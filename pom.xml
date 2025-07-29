@@ -21,9 +21,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/navikt/eux-avslutt-rinasaker.git</connection>
-        <developerConnection>scm:git:https://github.com/navikt/eux-avslutt-rinasaker.git</developerConnection>
-        <url>https://github.com/navikt/eux-avslutt-rinasaker.git</url>
+        <connection>scm:git:https://github.com/navikt/eux-pdf.git</connection>
+        <developerConnection>scm:git:https://github.com/navikt/eux-pdf.git</developerConnection>
+        <url>https://github.com/navikt/eux-pdf.git</url>
     </scm>
 
     <dependencies>
@@ -68,10 +68,6 @@
         </dependency>
 
         <!-- Other -->
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.github.oshai</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
@@ -141,33 +137,7 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>kafka</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility-kotlin</artifactId>
-            <version>4.2.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

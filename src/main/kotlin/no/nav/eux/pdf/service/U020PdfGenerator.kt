@@ -60,6 +60,7 @@ class EessiU020PdfGen {
             val document = PDDocument()
             val writer = PdfWriter(document)
             
+            writer.writeRinasakIdTopRight(master.rinasakId)
             writer.writeDocumentTitle()
             writer.writeGeneratedDate()
             writer.addBlankLine()
@@ -167,15 +168,14 @@ class EessiU020PdfGen {
         fun writeMasterInformation(master: U020Master) {
             writeSectionHeader("Generell Informasjon")
 
-            writeKeyValuePair("Saksnummer:", master.rinasakId)
             writeKeyValuePair("SED Versjon:", "${master.sedGVer}.${master.sedVer}")
-            writeKeyValuePair("ID-nummer for krav om refusjon", master.reimbursementRequestID)
+            writeKeyValuePair("ID-nummer for krav om refusjon:", master.reimbursementRequestID)
             writeKeyValuePair("Antall enkeltkrav:", master.numberIndividualClaims)
 
             addBlankLine()
             writeSubsectionHeader("Bankinformasjon")
 
-            writeKeyValuePair("Anmodet Totalbeløp", "${master.totalAmount} ${master.currency}")
+            writeKeyValuePair("Anmodet Totalbeløp:", "${master.totalAmount} ${master.currency}")
             writeKeyValuePair("IBAN:", master.iban)
             writeKeyValuePair("Bank Reference:", master.bankReference)
         }
@@ -209,6 +209,17 @@ class EessiU020PdfGen {
             }
 
             contentStream.close()
+        }
+
+        fun writeRinasakIdTopRight(rinasakId: String) {
+            val text = "Saksnummer: $rinasakId"
+            val textWidth = regularFont.getStringWidth(text) / 1000 * 10f
+
+            contentStream.beginText()
+            contentStream.setFont(regularFont, 10f)
+            contentStream.newLineAtOffset(pageWidth - marginRight - textWidth, pageHeight - marginTop)
+            contentStream.showText(text)
+            contentStream.endText()
         }
     }
 

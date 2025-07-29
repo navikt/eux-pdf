@@ -1,0 +1,18 @@
+name: eux-pdf-q1
+ingress: https://eux-pdf-q1.intern.dev.nav.no
+
+application:
+  eux-slett-usendte-rinasaker:
+    name: eux-slett-usendte-rinasaker-q1
+    namespace: eessibasis
+  eux-avslutt-rinasaker:
+    name: eux-avslutt-rinasaker-q1
+    namespace: eessibasis
+  user-secret: eux-rina-terminator-api-q1
+
+cluster:
+  fss: dev-fss
+  gcp: dev-gcp
+
+rina:
+  endpoint: rina-ss4-q.adeo.no
