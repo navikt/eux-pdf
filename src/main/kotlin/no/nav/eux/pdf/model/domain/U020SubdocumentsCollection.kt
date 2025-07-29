@@ -23,7 +23,7 @@ data class Subdocument(
     val versions: List<Version>,
     val parentDocumentId: String,
     val type: String,
-    val attachments: List<Any>, // Empty array in the example
+    val attachments: List<Any>,
     val traits: Traits,
     val validation: Validation
 )
@@ -59,7 +59,7 @@ data class User(
 
 data class Traits(
     val fam: String,
-    val `for`: String, // Using backticks because 'for' is a Kotlin keyword
+    val `for`: String,
     val cid: String
 )
 

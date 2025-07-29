@@ -55,8 +55,6 @@ class PdfController(
         return ResponseEntity.ok(rinaCase)
     }
 
-
-
     @GetMapping("/rinasak/{caseId}/document/{documentId}")
     fun getDocument(
         @PathVariable caseId: Int,

@@ -1,19 +1,17 @@
 package no.nav.eux.pdf.config
 
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 
 @Configuration
 class IntegrationConfig {
 
     @Bean
-    fun rinaRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
+    fun restClient(
         authenticationInterceptor: AuthenticationInterceptor
-    ): RestTemplate = restTemplateBuilder
-        .additionalInterceptors(authenticationInterceptor)
+    ): RestClient = RestClient.builder()
+        .requestInterceptor(authenticationInterceptor)
         .build()
 
     @Bean
