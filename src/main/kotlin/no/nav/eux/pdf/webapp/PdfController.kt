@@ -28,9 +28,12 @@ class PdfController(
         return "PDF Service is running - Test endpoint working!"
     }
 
-    @GetMapping("/u020/pdf", produces = [MediaType.APPLICATION_PDF_VALUE])
-    fun getU020Pdf(): ResponseEntity<ByteArray> {
-        val pdfBytes = u020PdfService.u020Pdf()
+    @GetMapping("/rinasak/{caseId}/document/u020/{documentId}", produces = [MediaType.APPLICATION_PDF_VALUE])
+    fun getU020Pdf(
+        @PathVariable caseId: Int,
+        @PathVariable documentId: String
+    ): ResponseEntity<ByteArray> {
+        val pdfBytes = u020PdfService.u020Pdf(caseId, documentId)
 
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_PDF
@@ -51,6 +54,8 @@ class PdfController(
         val rinaCase = rinaClient.rinasak(rinasakId)
         return ResponseEntity.ok(rinaCase)
     }
+
+
 
     @GetMapping("/rinasak/{caseId}/document/{documentId}")
     fun getDocument(
