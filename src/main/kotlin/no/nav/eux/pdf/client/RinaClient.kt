@@ -3,6 +3,9 @@ package no.nav.eux.pdf.client
 import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import no.nav.eux.pdf.config.RinaCpiServiceProperties
 import no.nav.eux.pdf.config.RinaRestClient
+import no.nav.eux.pdf.model.domain.U020ChildDocument
+import no.nav.eux.pdf.model.domain.U020MasterDocument
+import no.nav.eux.pdf.model.domain.U020SubdocumentsCollection
 
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.ResponseEntity
@@ -32,36 +35,36 @@ class RinaClient(
          return entity.body!!
     }
 
-    fun getDocument(caseId: Int, documentId: String): String {
-        val entity: ResponseEntity<String> = rinaRestClient
+    fun getDocument(caseId: Int, documentId: String): U020MasterDocument {
+        val entity: ResponseEntity<U020MasterDocument> = rinaRestClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId")
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
-            .toEntity<String>()
+            .toEntity<U020MasterDocument>()
         return entity.body!!
     }
 
-    fun getSubdocuments(caseId: Int, documentId: String): String {
-        val entity: ResponseEntity<String> = rinaRestClient
+    fun getSubdocuments(caseId: Int, documentId: String): U020SubdocumentsCollection {
+        val entity: ResponseEntity<U020SubdocumentsCollection> = rinaRestClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments")
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
-            .toEntity<String>()
+            .toEntity<U020SubdocumentsCollection>()
         return entity.body!!
     }
 
-    fun getSubdocument(caseId: Int, documentId: String, subdocumentId: String): String {
-        val entity: ResponseEntity<String> = rinaRestClient
+    fun getSubdocument(caseId: Int, documentId: String, subdocumentId: String): U020ChildDocument {
+        val entity: ResponseEntity<U020ChildDocument> = rinaRestClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments/$subdocumentId")
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
-            .toEntity<String>()
+            .toEntity<U020ChildDocument>()
         return entity.body!!
     }
 }

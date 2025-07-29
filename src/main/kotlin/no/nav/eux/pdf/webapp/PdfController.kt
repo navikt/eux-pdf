@@ -1,6 +1,9 @@
 package no.nav.eux.pdf.webapp
 
 import no.nav.eux.pdf.client.RinaClient
+import no.nav.eux.pdf.model.domain.U020ChildDocument
+import no.nav.eux.pdf.model.domain.U020MasterDocument
+import no.nav.eux.pdf.model.domain.U020SubdocumentsCollection
 import no.nav.eux.pdf.model.rinasak.RinaCase
 import no.nav.eux.pdf.service.U020PdfService
 import no.nav.security.token.support.core.api.Protected
@@ -53,7 +56,7 @@ class PdfController(
     fun getDocument(
         @PathVariable caseId: Int,
         @PathVariable documentId: String
-    ): ResponseEntity<String> {
+    ): ResponseEntity<U020MasterDocument> {
         val document = rinaClient.getDocument(caseId, documentId)
         return ResponseEntity.ok(document)
     }
@@ -62,7 +65,7 @@ class PdfController(
     fun getSubdocuments(
         @PathVariable caseId: Int,
         @PathVariable documentId: String
-    ): ResponseEntity<String> {
+    ): ResponseEntity<U020SubdocumentsCollection> {
         val subdocuments = rinaClient.getSubdocuments(caseId, documentId)
         return ResponseEntity.ok(subdocuments)
     }
@@ -72,7 +75,7 @@ class PdfController(
         @PathVariable caseId: Int,
         @PathVariable documentId: String,
         @PathVariable subdocumentId: String
-    ): ResponseEntity<String> {
+    ): ResponseEntity<U020ChildDocument> {
         val subdocument = rinaClient.getSubdocument(caseId, documentId, subdocumentId)
         return ResponseEntity.ok(subdocument)
     }
