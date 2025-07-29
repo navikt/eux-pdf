@@ -1,11 +1,14 @@
 package no.nav.eux.pdf.webapp
 
+import no.nav.eux.pdf.client.RinaClient
+import no.nav.eux.pdf.model.rinasak.RinaCase
 import no.nav.eux.pdf.service.U020PdfService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -13,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @Protected
 class PdfController(
-    private val u020PdfService: U020PdfService
+    private val u020PdfService: U020PdfService,
+    private val rinaClient: RinaClient
 ) {
 
     @GetMapping("/test")
@@ -37,5 +41,11 @@ class PdfController(
         return ResponseEntity.ok()
             .headers(headers)
             .body(pdfBytes)
+    }
+
+    @GetMapping("/rinasak/{rinasakId}")
+    fun getRinaCase(@PathVariable rinasakId: Int): ResponseEntity<RinaCase> {
+        val rinaCase = rinaClient.rinasak(rinasakId)
+        return ResponseEntity.ok(rinaCase)
     }
 }
