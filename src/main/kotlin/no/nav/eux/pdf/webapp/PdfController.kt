@@ -1,6 +1,7 @@
 package no.nav.eux.pdf.webapp
 
 import no.nav.eux.pdf.service.U020PdfService
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RequestMapping("\${api.base-path:/api/v1}")
 @RestController
+@Protected
 class PdfController(
     private val u020PdfService: U020PdfService
 ) {
