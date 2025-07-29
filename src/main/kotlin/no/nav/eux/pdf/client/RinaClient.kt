@@ -21,20 +21,6 @@ class RinaClient(
 
     val casesUri: String by lazy { "${rinaCpiServiceProperties.rinaBaseUrl}/eessiRest/Cases" }
 
-    fun hentRinasak(rinasakId: Int): String {
-        val entity: ResponseEntity<String> = rinaRestClient
-            .get()
-            .uri(hentRinasakUri(rinasakId))
-            .accept(APPLICATION_JSON)
-            .header("Nav-Call-Id", rinasakId.toString())
-            .retrieve()
-            .toEntity()
-        when {
-            entity.statusCode.is2xxSuccessful -> return entity.body!!
-            else -> throw hentRinasakException(rinasakId, entity)
-        }
-    }
-
     fun rinasak(rinasakId: Int): RinaCase {
         val entity: ResponseEntity<RinaCase> = rinaRestClient
             .get()
@@ -46,74 +32,36 @@ class RinaClient(
          return entity.body!!
     }
 
-    fun rinasakString(rinasakId: Int): String {
+    fun getDocument(caseId: Int, documentId: String): String {
         val entity: ResponseEntity<String> = rinaRestClient
             .get()
-            .uri("$casesUri/$rinasakId")
+            .uri("$casesUri/$caseId/Documents/$documentId")
             .accept(APPLICATION_JSON)
-            .header("Nav-Call-Id", rinasakId.toString())
+            .header("Nav-Call-Id", caseId.toString())
             .retrieve()
             .toEntity<String>()
         return entity.body!!
     }
 
-    fun oppdaterRinasak(
-        rinasakId: Int,
-        actionId: String,
-        bodyJson: String
-    ): String {
+    fun getSubdocuments(caseId: Int, documentId: String): String {
         val entity: ResponseEntity<String> = rinaRestClient
-            .put()
-            .uri(oppdaterRinasakUri(rinasakId, actionId))
+            .get()
+            .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments")
             .accept(APPLICATION_JSON)
-            .contentType(APPLICATION_JSON)
-            .body(bodyJson)
+            .header("Nav-Call-Id", caseId.toString())
             .retrieve()
-            .toEntity()
-        when {
-            entity.statusCode.is2xxSuccessful -> return entity.body!!
-            else -> throw oppdaterRinasakException(rinasakId, entity)
-        }
+            .toEntity<String>()
+        return entity.body!!
     }
 
-    fun hentRinasakUri(
-        rinasakId: Int
-    ) =
-        UriComponentsBuilder
-            .fromHttpUrl("${rinaCpiServiceProperties.rinaBaseUrl}/eessiRest/Cases/")
-            .path(rinasakId.toString())
-            .build()
-            .toUri()
-
-    fun oppdaterRinasakUri(
-        rinasakId: Int,
-        actionId: String
-    ) =
-        UriComponentsBuilder
-            .fromHttpUrl("${rinaCpiServiceProperties.rinaBaseUrl}/eessiRest/Cases/")
-            .path(rinasakId.toString())
-            .path("/Actions/")
-            .path(actionId)
-            .path("/Document")
-            .queryParam("rinasakId", rinasakId)
-            .build()
-            .toUri()
-
-    fun hentRinasakException(
-        rinasakId: Int,
-        entity: ResponseEntity<String>
-    ) = rinaException("Feil under henting av rinasak. rinasakId=$rinasakId", entity.body)
-
-    fun oppdaterRinasakException(
-        rinasakId: Int,
-        entity: ResponseEntity<String>
-    ) = rinaException("Feil under oppdatering av rinasak=$rinasakId", entity.body)
-
-    fun rinaException(
-        msg: String,
-        body: Any?
-    ): RuntimeException {
-        log.error { "$msg, body=$body" }
-        return RuntimeException(msg)
+    fun getSubdocument(caseId: Int, documentId: String, subdocumentId: String): String {
+        val entity: ResponseEntity<String> = rinaRestClient
+            .get()
+            .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments/$subdocumentId")
+            .accept(APPLICATION_JSON)
+            .header("Nav-Call-Id", caseId.toString())
+            .retrieve()
+            .toEntity<String>()
+        return entity.body!!
     }
 }

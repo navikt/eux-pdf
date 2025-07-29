@@ -48,4 +48,32 @@ class PdfController(
         val rinaCase = rinaClient.rinasak(rinasakId)
         return ResponseEntity.ok(rinaCase)
     }
+
+    @GetMapping("/rinasak/{caseId}/document/{documentId}")
+    fun getDocument(
+        @PathVariable caseId: Int,
+        @PathVariable documentId: String
+    ): ResponseEntity<String> {
+        val document = rinaClient.getDocument(caseId, documentId)
+        return ResponseEntity.ok(document)
+    }
+
+    @GetMapping("/rinasak/{caseId}/document/{documentId}/subdocuments")
+    fun getSubdocuments(
+        @PathVariable caseId: Int,
+        @PathVariable documentId: String
+    ): ResponseEntity<String> {
+        val subdocuments = rinaClient.getSubdocuments(caseId, documentId)
+        return ResponseEntity.ok(subdocuments)
+    }
+
+    @GetMapping("/rinasak/{caseId}/document/{documentId}/subdocuments/{subdocumentId}")
+    fun getSubdocument(
+        @PathVariable caseId: Int,
+        @PathVariable documentId: String,
+        @PathVariable subdocumentId: String
+    ): ResponseEntity<String> {
+        val subdocument = rinaClient.getSubdocument(caseId, documentId, subdocumentId)
+        return ResponseEntity.ok(subdocument)
+    }
 }
