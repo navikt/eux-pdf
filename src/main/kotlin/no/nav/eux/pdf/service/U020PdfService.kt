@@ -2,8 +2,10 @@ package no.nav.eux.pdf.service
 
 import no.nav.eux.pdf.client.RinaClient
 import no.nav.eux.pdf.model.domain.U020ChildDocument
-import no.nav.eux.pdf.model.domain.U020MasterDocument
+import no.nav.eux.pdf.model.domain.U020MasterContent
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class U020PdfService(
@@ -15,20 +17,21 @@ class U020PdfService(
         documentId: String
     ): ByteArray {
         val masterDocument = rinaClient.getDocument(caseId, documentId)
+        val masterDocumentContent = masterDocument.u020Master
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U020 master ikke funnet")
         val subdocumentsCollection = rinaClient.getSubdocuments(caseId, documentId)
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
                 rinaClient.getSubdocument(caseId, documentId, subdocument.id)
             }
         }
-        val master = mapToU020Master(caseId.toString(), masterDocument)
+        val master = mapToU020Master(caseId.toString(), masterDocumentContent)
         val claims = childDocuments.map { mapToU020Child(it) }
         val pdfGen = EessiU020PdfGen()
         return pdfGen.generateU020Document(master, claims)
     }
 
-    private fun mapToU020Master(rinasakId: String, masterDoc: U020MasterDocument): U020Master {
-        val master = masterDoc.u020Master
+    private fun mapToU020Master(rinasakId: String, master: U020MasterContent): U020Master {
         val generalInfo = master.generalInformation
         val totalAmount = generalInfo.totalAmountRequested
         val bankInfo = generalInfo.bankInformation

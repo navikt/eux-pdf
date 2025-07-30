@@ -5,21 +5,20 @@ import no.nav.eux.pdf.config.RinaCpiServiceProperties
 import no.nav.eux.pdf.model.domain.U020ChildDocument
 import no.nav.eux.pdf.model.domain.U020MasterDocument
 import no.nav.eux.pdf.model.domain.U020SubdocumentsCollection
-
+import no.nav.eux.pdf.model.rinasak.RinaCase
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
-
-import no.nav.eux.pdf.model.rinasak.RinaCase
+import org.springframework.web.server.ResponseStatusException
 
 @Component
 class RinaClient(
     val rinaCpiServiceProperties: RinaCpiServiceProperties,
     val restClient: RestClient,
 ) {
-    val log = logger {}
+    private val log = logger {}
 
     val casesUri: String by lazy { "${rinaCpiServiceProperties.rinaBaseUrl}/eessiRest/Cases" }
 
@@ -30,6 +29,15 @@ class RinaClient(
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", rinasakId.toString())
             .retrieve()
+            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                log.error { "HTTP ${response.statusCode.value()} error for rinasak $rinasakId: $errorBody" }
+                val errorMessage = if (response.statusCode.is4xxClientError)
+                    "Rinasak ikke funnet"
+                else
+                    "Serverfeil ved henting av rinasak"
+                throw ResponseStatusException(response.statusCode, errorMessage)
+            }
             .toEntity<RinaCase>()
          return entity.body!!
     }
@@ -41,6 +49,17 @@ class RinaClient(
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
+            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                log.error {
+                    "HTTP ${response.statusCode.value()} error for document $documentId in case $caseId: $errorBody"
+                }
+                val errorMessage = if (response.statusCode.is4xxClientError)
+                    "Dokument ikke funnet"
+                else
+                    "Serverfeil ved henting av dokument"
+                throw ResponseStatusException(response.statusCode, errorMessage)
+            }
             .toEntity<U020MasterDocument>()
         return entity.body!!
     }
@@ -52,6 +71,17 @@ class RinaClient(
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
+            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                log.error {
+                    "HTTP ${response.statusCode.value()} error for subdocuments of document $documentId in case $caseId: $errorBody"
+                }
+                val errorMessage = if (response.statusCode.is4xxClientError)
+                    "Underdokumenter ikke funnet"
+                else
+                    "Serverfeil ved henting av underdokumenter"
+                throw ResponseStatusException(response.statusCode, errorMessage)
+            }
             .toEntity<U020SubdocumentsCollection>()
         return entity.body!!
     }
@@ -63,6 +93,17 @@ class RinaClient(
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
+            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                log.error {
+                    "HTTP ${response.statusCode.value()} error for subdocument $subdocumentId of document $documentId in case $caseId: $errorBody"
+                }
+                val errorMessage = if (response.statusCode.is4xxClientError)
+                    "Underdokument ikke funnet"
+                else
+                    "Serverfeil ved henting av underdokument"
+                throw ResponseStatusException(response.statusCode, errorMessage)
+            }
             .toEntity<U020ChildDocument>()
         return entity.body!!
     }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class U020MasterDocument(
     @JsonProperty("U020_Master")
-    val u020Master: U020MasterContent
+    val u020Master: U020MasterContent?
 )
 
 data class U020MasterContent(
