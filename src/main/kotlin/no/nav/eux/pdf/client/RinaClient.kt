@@ -1,6 +1,7 @@
 package no.nav.eux.pdf.client
 
 import io.github.oshai.kotlinlogging.KotlinLogging.logger
+import no.nav.eux.logging.mdc
 import no.nav.eux.pdf.config.RinaCpiServiceProperties
 import no.nav.eux.pdf.model.domain.U020ChildDocument
 import no.nav.eux.pdf.model.domain.U020MasterDocument
@@ -39,30 +40,30 @@ class RinaClient(
                 throw ResponseStatusException(response.statusCode, errorMessage)
             }
             .toEntity<RinaCase>()
-         return entity.body!!
+        return entity.body!!
     }
 
-    fun getDocument(caseId: Int, documentId: String): U020MasterDocument {
-        val entity: ResponseEntity<U020MasterDocument> = restClient
+    fun getDocument(caseId: Int, documentId: String): U020MasterDocument =
+        restClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId")
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
-            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+            .onStatus({ it.is4xxClientError }) { _, response ->
                 val errorBody = String(response.body.readAllBytes())
-                log.error {
-                    "HTTP ${response.statusCode.value()} error for document $documentId in case $caseId: $errorBody"
-                }
-                val errorMessage = if (response.statusCode.is4xxClientError)
-                    "Dokument ikke funnet"
-                else
-                    "Serverfeil ved henting av dokument"
-                throw ResponseStatusException(response.statusCode, errorMessage)
+                mdc(rinasakId = caseId)
+                log.warn { "HTTP ${response.statusCode.value()} client error for document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Dokument ikke funnet")
+            }
+            .onStatus({ it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                mdc(rinasakId = caseId)
+                log.error { "HTTP ${response.statusCode.value()} server error for document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Serverfeil ved henting av dokument")
             }
             .toEntity<U020MasterDocument>()
-        return entity.body!!
-    }
+            .body!!
 
     fun getSubdocuments(caseId: Int, documentId: String): U020SubdocumentsCollection {
         val entity: ResponseEntity<U020SubdocumentsCollection> = restClient
