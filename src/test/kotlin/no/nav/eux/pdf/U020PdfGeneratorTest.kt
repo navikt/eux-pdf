@@ -25,8 +25,8 @@ class U020PdfGeneratorTest {
         )
         val claims = listOf(
             U020Child(
-                familyName = "eee",
-                forename = "ffff",
+                familyName = "Hansen",
+                forename = "Kari",
                 dateBirth = "2011-06-01",
                 sex = "01",
                 reimbursementRequestID = "111111",
@@ -42,8 +42,8 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Doe",
-                forename = "Jane",
+                familyName = "Johansen",
+                forename = "Erik",
                 dateBirth = "1985-03-15",
                 sex = "02",
                 reimbursementRequestID = "111111",
@@ -59,8 +59,8 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Doe3",
-                forename = "Jane",
+                familyName = "Andersen",
+                forename = "Ingrid",
                 dateBirth = "1985-03-15",
                 sex = "02",
                 reimbursementRequestID = "111111",
@@ -76,8 +76,8 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Doe4",
-                forename = "Jane",
+                familyName = "Olsen",
+                forename = "Magnus",
                 dateBirth = "1985-03-15",
                 sex = "02",
                 reimbursementRequestID = "111111",
@@ -93,8 +93,8 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Doe5",
-                forename = "Jane",
+                familyName = "Larsen",
+                forename = "Astrid",
                 dateBirth = "1985-03-15",
                 sex = "02",
                 reimbursementRequestID = "111111",
@@ -110,8 +110,8 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Doe6",
-                forename = "Jane",
+                familyName = "Svendsen",
+                forename = "Bjørn",
                 dateBirth = "1985-03-15",
                 sex = "02",
                 reimbursementRequestID = "111111",
@@ -127,8 +127,8 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Doe7",
-                forename = "Jane",
+                familyName = "Kristiansen",
+                forename = "Lena",
                 dateBirth = "1985-03-15",
                 sex = "02",
                 reimbursementRequestID = "111111",
