@@ -9,6 +9,7 @@ import no.nav.eux.pdf.service.U020PdfService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -28,13 +29,12 @@ class PdfController(
         return "PDF Service is running - Test endpoint working!"
     }
 
-    @GetMapping("/rinasak/{caseId}/document/u020/{documentId}", produces = [MediaType.APPLICATION_PDF_VALUE])
+    @GetMapping("/rinasak/{caseId}/document/u020/{documentId}", produces = [APPLICATION_PDF_VALUE])
     fun getU020Pdf(
         @PathVariable caseId: Int,
         @PathVariable documentId: String
     ): ResponseEntity<ByteArray> {
         val pdfBytes = u020PdfService.u020Pdf(caseId, documentId)
-
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_PDF
             contentDisposition = org.springframework.http.ContentDisposition
@@ -43,7 +43,6 @@ class PdfController(
                 .build()
             contentLength = pdfBytes.size.toLong()
         }
-
         return ResponseEntity.ok()
             .headers(headers)
             .body(pdfBytes)

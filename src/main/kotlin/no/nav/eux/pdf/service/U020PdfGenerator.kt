@@ -67,7 +67,8 @@ class EessiU020PdfGen {
             
             writer.writeMasterInformation(master)
             writer.addBlankLine()
-            
+            writer.addBlankLine()
+
             writer.writeIndividualClaims(claims)
             
             val outputStream = ByteArrayOutputStream()
@@ -103,7 +104,7 @@ class EessiU020PdfGen {
         fun writeDocumentTitle() {
             checkPageSpace(30f)
             contentStream.beginText()
-            contentStream.setFont(boldFont, 18f)
+            contentStream.setFont(boldFont, 16f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText("U020 - Forespørsel om refusjon")
             contentStream.endText()
@@ -114,7 +115,7 @@ class EessiU020PdfGen {
             checkPageSpace()
             val dateString = "PDF Generert: ${LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)}"
             contentStream.beginText()
-            contentStream.setFont(regularFont, 10f)
+            contentStream.setFont(regularFont, 8f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText(dateString)
             contentStream.endText()
@@ -124,7 +125,7 @@ class EessiU020PdfGen {
         fun writeSectionHeader(title: String) {
             checkPageSpace(25f)
             contentStream.beginText()
-            contentStream.setFont(boldFont, 16f)
+            contentStream.setFont(boldFont, 14f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText(title)
             contentStream.endText()
@@ -134,7 +135,7 @@ class EessiU020PdfGen {
         fun writeSubsectionHeader(title: String) {
             checkPageSpace()
             contentStream.beginText()
-            contentStream.setFont(boldFont, 14f)
+            contentStream.setFont(boldFont, 12f)
             contentStream.newLineAtOffset(marginLeft + 20f, currentY)
             contentStream.showText(title)
             contentStream.endText()
@@ -144,16 +145,16 @@ class EessiU020PdfGen {
         fun writeKeyValuePair(key: String, value: String) {
             checkPageSpace()
             val keyText = "$key "
-            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 12f
+            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 10f
 
             contentStream.beginText()
-            contentStream.setFont(boldFont, 12f)
+            contentStream.setFont(boldFont, 10f)
             contentStream.newLineAtOffset(marginLeft + 40f, currentY)
             contentStream.showText(keyText)
             contentStream.endText()
 
             contentStream.beginText()
-            contentStream.setFont(regularFont, 12f)
+            contentStream.setFont(regularFont, 10f)
             contentStream.newLineAtOffset(marginLeft + 40f + keyWidth, currentY)
             contentStream.showText(value)
             contentStream.endText()
@@ -184,17 +185,22 @@ class EessiU020PdfGen {
             writeSectionHeader("Enkeltkrav")
 
             claims.forEachIndexed { index, claim ->
+                val requiredSpace = lineHeight + (9 * lineHeight) + if (index < claims.size - 1) lineHeight / 2 else 0f
+
+                if (currentY - requiredSpace < marginBottom) {
+                    contentStream.close()
+                    currentPage = createNewPage()
+                    contentStream = PDPageContentStream(document, currentPage)
+                    currentY = pageHeight - marginTop
+                }
+
                 writeSubsectionHeader("Krav #${index + 1}")
 
                 writeKeyValuePair("Navn:", "${claim.forename} ${claim.familyName}")
                 writeKeyValuePair("Fødselsdato:", formatDate(claim.dateBirth))
                 writeKeyValuePair("Kjønn:", getSexDescription(claim.sex))
                 writeKeyValuePair("Sekvensnummer:", claim.sequentialNumber)
-
-                addBlankLine()
                 writeKeyValuePair("Institusjon:", "${claim.institutionName} (${claim.institutionID})")
-
-                addBlankLine()
                 writeKeyValuePair("Arbeidsperiode:",
                     "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}")
                 writeKeyValuePair("Refusjonsperiode:",
@@ -202,10 +208,8 @@ class EessiU020PdfGen {
                 writeKeyValuePair("Siste utbetalingsdato:", formatDate(claim.lastPaymentDate))
                 writeKeyValuePair("Anmodet refusjonsbeløp:", "${claim.requestedAmount} ${claim.requestedCurrency}")
 
-                if (index < claims.size - 1) {
+                if (index < claims.size - 1)
                     addBlankLine()
-                    addBlankLine()
-                }
             }
 
             contentStream.close()
@@ -213,10 +217,10 @@ class EessiU020PdfGen {
 
         fun writeRinasakIdTopRight(rinasakId: String) {
             val text = "Saksnummer: $rinasakId"
-            val textWidth = regularFont.getStringWidth(text) / 1000 * 10f
+            val textWidth = regularFont.getStringWidth(text) / 1000 * 8f
 
             contentStream.beginText()
-            contentStream.setFont(regularFont, 10f)
+            contentStream.setFont(regularFont, 9f)
             contentStream.newLineAtOffset(pageWidth - marginRight - textWidth, pageHeight - marginTop)
             contentStream.showText(text)
             contentStream.endText()

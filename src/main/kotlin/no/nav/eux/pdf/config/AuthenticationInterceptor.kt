@@ -60,7 +60,6 @@ open class AuthenticationInterceptor(
             .toEntity<String>()
             .body ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tom body. Forventet serviceticket")
 
-    @Cacheable(CacheConfig.CPI_SESSION_CACHE)
     open fun cpiHttpHeaders(serviceticket: String) =
         RestClient.builder().baseUrl(rinaCpiServiceProperties.rinaBaseUrl).build()
             .get()

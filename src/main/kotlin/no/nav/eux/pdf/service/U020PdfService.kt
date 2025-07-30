@@ -17,8 +17,8 @@ class U020PdfService(
         val masterDocument = rinaClient.getDocument(caseId, documentId)
         val subdocumentsCollection = rinaClient.getSubdocuments(caseId, documentId)
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
-            item.subdocuments.map { subdoc ->
-                rinaClient.getSubdocument(caseId, documentId, subdoc.id)
+            item.subdocuments.map { subdocument ->
+                rinaClient.getSubdocument(caseId, documentId, subdocument.id)
             }
         }
         val master = mapToU020Master(caseId.toString(), masterDocument)
@@ -32,7 +32,6 @@ class U020PdfService(
         val generalInfo = master.generalInformation
         val totalAmount = generalInfo.totalAmountRequested
         val bankInfo = generalInfo.bankInformation
-
         return U020Master(
             rinasakId = rinasakId,
             sedGVer = master.sedGVer,
