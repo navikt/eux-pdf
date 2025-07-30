@@ -2,11 +2,8 @@ name: eux-pdf-q2
 ingress: https://eux-pdf-q2.intern.dev.nav.no
 
 application:
-  eux-slett-usendte-rinasaker:
-    name: eux-slett-usendte-rinasaker-q2
-    namespace: eessibasis
-  eux-avslutt-rinasaker:
-    name: eux-avslutt-rinasaker-q2
+  eux-rina-api:
+    name: eux-rina-api-q2
     namespace: eessibasis
   user-secret: eux-rina-terminator-api-q2
 

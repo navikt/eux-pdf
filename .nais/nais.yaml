@@ -50,11 +50,8 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: {{ application.eux-slett-usendte-rinasaker.name }}
-          namespace: {{ application.eux-slett-usendte-rinasaker.namespace }}
-          cluster: {{ cluster.gcp }}
-        - application: {{ application.eux-avslutt-rinasaker.name }}
-          namespace: {{ application.eux-avslutt-rinasaker.namespace }}
+        - application: {{ application.eux-rina-api.name }}
+          namespace: {{ application.eux-rina-api.namespace }}
           cluster: {{ cluster.gcp }}
     outbound:
       external:

@@ -47,7 +47,7 @@ open class AuthenticationInterceptor(
             .headers
             .location
             .toString()
-            .replace(rinaCpiServiceProperties.replaceOld, rinaCpiServiceProperties.replaceNew)
+            .replace(rinaCpiServiceProperties.http, rinaCpiServiceProperties.https)
 
     private fun serviceticket(serviceticketUrl: String) =
         RestClient.builder().baseUrl(serviceticketUrl).build()
