@@ -88,7 +88,6 @@ class PdfController(
             required = true
         )
         @PathVariable caseId: Int,
-
         @Parameter(
             description = "U020 master document ID (UUID format)",
             example = "f0293bae3c494391851a76d0f6f82f46",
