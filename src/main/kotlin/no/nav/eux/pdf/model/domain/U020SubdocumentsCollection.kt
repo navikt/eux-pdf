@@ -1,7 +1,5 @@
 package no.nav.eux.pdf.model.domain
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
 data class U020SubdocumentsCollection(
     val totalCount: Int,
     val items: List<SubdocumentItem>

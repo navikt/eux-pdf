@@ -1,6 +1,5 @@
 package no.nav.eux.pdf.config
 
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpRequest
 import org.springframework.http.HttpStatus
@@ -32,10 +31,8 @@ open class AuthenticationInterceptor(
         val headers = cpiHttpHeaders(serviceticket)
         val xauthCookie = headers.getFirst(headerXAuthCookie)
         val jsessionId = headers.getFirst(headerSetCookie)
-
         request.headers.add(HttpHeaders.COOKIE, jsessionId)
         request.headers.set(requestHeaderXsrfToken, xauthCookie)
-
         return execution.execute(request, body)
     }
 
