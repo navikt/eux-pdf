@@ -28,8 +28,8 @@ import org.springframework.web.bind.annotation.RestController
 @Protected
 @Tag(name = "PDF Generation", description = "API for generating PDF documents from RINA/EESSI data")
 class PdfController(
-    private val u020PdfService: U020PdfService,
-    private val rinaClient: RinaClient
+    val u020PdfService: U020PdfService,
+    val rinaClient: RinaClient
 ) {
 
     @GetMapping("/test")

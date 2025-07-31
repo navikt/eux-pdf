@@ -43,55 +43,53 @@ data class U020Child(
 )
 
 class EessiU020PdfGen {
-    
-    private val pageWidth = PDRectangle.A4.width
-    private val pageHeight = PDRectangle.A4.height
-    private val marginLeft = 50f
-    private val marginRight = 50f
-    private val marginTop = 50f
-    private val marginBottom = 50f
-    private val lineHeight = 20f
-    
-    private val boldFont = PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
-    private val regularFont = PDType1Font(Standard14Fonts.FontName.HELVETICA)
-    
-    fun generateU020Document(master: U020Master, claims: List<U020Child>): ByteArray {
-        return try {
+
+    val pageWidth = PDRectangle.A4.width
+    val pageHeight = PDRectangle.A4.height
+    val marginLeft = 50f
+    val marginRight = 50f
+    val marginTop = 50f
+    val marginBottom = 50f
+    val lineHeight = 20f
+    val boldFont = PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
+    val regularFont = PDType1Font(Standard14Fonts.FontName.HELVETICA)
+
+    fun generateU020Document(master: U020Master, claims: List<U020Child>): ByteArray =
+        try {
             val document = PDDocument()
             val writer = PdfWriter(document)
-            
+
             writer.writeRinasakIdTopRight(master.rinasakId)
             writer.writeDocumentTitle()
             writer.writeGeneratedDate()
             writer.addBlankLine()
-            
+
             writer.writeMasterInformation(master)
             writer.addBlankLine()
             writer.addBlankLine()
 
             writer.writeIndividualClaims(claims)
-            
+
             val outputStream = ByteArrayOutputStream()
             document.save(outputStream)
             document.close()
-            
+
             outputStream.toByteArray()
         } catch (e: IOException) {
             throw RuntimeException("Failed to generate EESSI U020 PDF", e)
         }
-    }
-    
-    private inner class PdfWriter(private val document: PDDocument) {
-        private var currentPage: PDPage = createNewPage()
-        private var contentStream: PDPageContentStream = PDPageContentStream(document, currentPage)
-        private var currentY: Float = pageHeight - marginTop
-        
+
+    private inner class PdfWriter(val document: PDDocument) {
+        var currentPage: PDPage = createNewPage()
+        var contentStream: PDPageContentStream = PDPageContentStream(document, currentPage)
+        var currentY: Float = pageHeight - marginTop
+
         private fun createNewPage(): PDPage {
             val page = PDPage(PDRectangle.A4)
             document.addPage(page)
             return page
         }
-        
+
         private fun checkPageSpace(requiredSpace: Float = lineHeight) {
             if (currentY - requiredSpace < marginBottom) {
                 contentStream.close()
@@ -201,10 +199,14 @@ class EessiU020PdfGen {
                 writeKeyValuePair("Kjønn:", getSexDescription(claim.sex))
                 writeKeyValuePair("Sekvensnummer:", claim.sequentialNumber)
                 writeKeyValuePair("Institusjon:", "${claim.institutionName} (${claim.institutionID})")
-                writeKeyValuePair("Arbeidsperiode:",
-                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}")
-                writeKeyValuePair("Refusjonsperiode:",
-                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}")
+                writeKeyValuePair(
+                    "Arbeidsperiode:",
+                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}"
+                )
+                writeKeyValuePair(
+                    "Refusjonsperiode:",
+                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}"
+                )
                 writeKeyValuePair("Siste utbetalingsdato:", formatDate(claim.lastPaymentDate))
                 writeKeyValuePair("Anmodet refusjonsbeløp:", "${claim.requestedAmount} ${claim.requestedCurrency}")
 
@@ -227,7 +229,7 @@ class EessiU020PdfGen {
         }
     }
 
-    private fun formatDate(dateString: String): String =
+    fun formatDate(dateString: String): String =
         try {
             val date = LocalDate.parse(dateString)
             date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
@@ -235,7 +237,7 @@ class EessiU020PdfGen {
             dateString
         }
 
-    private fun getSexDescription(sexCode: String): String =
+    fun getSexDescription(sexCode: String): String =
         when (sexCode) {
             "01" -> "Mann"
             "02" -> "Kvinne"

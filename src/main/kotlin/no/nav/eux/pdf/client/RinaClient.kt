@@ -19,12 +19,12 @@ class RinaClient(
     val rinaCpiServiceProperties: RinaCpiServiceProperties,
     val restClient: RestClient,
 ) {
-    private val log = logger {}
+    val log = logger {}
 
     val casesUri: String by lazy { "${rinaCpiServiceProperties.rinaBaseUrl}/eessiRest/Cases" }
 
-    fun rinasak(rinasakId: Int): RinaCase {
-        val entity: ResponseEntity<RinaCase> = restClient
+    fun rinasak(rinasakId: Int): RinaCase =
+        restClient
             .get()
             .uri("$casesUri/$rinasakId")
             .accept(APPLICATION_JSON)
@@ -40,8 +40,7 @@ class RinaClient(
                 throw ResponseStatusException(response.statusCode, errorMessage)
             }
             .toEntity<RinaCase>()
-        return entity.body!!
-    }
+            .body!!
 
     fun getDocument(caseId: Int, documentId: String): U020MasterDocument =
         restClient
@@ -65,47 +64,46 @@ class RinaClient(
             .toEntity<U020MasterDocument>()
             .body!!
 
-    fun getSubdocuments(caseId: Int, documentId: String): U020SubdocumentsCollection {
-        val entity: ResponseEntity<U020SubdocumentsCollection> = restClient
-            .get()
-            .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments")
-            .accept(APPLICATION_JSON)
-            .header("Nav-Call-Id", caseId.toString())
-            .retrieve()
-            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
-                val errorBody = String(response.body.readAllBytes())
-                log.error {
-                    "HTTP ${response.statusCode.value()} error for subdocuments of document $documentId in case $caseId: $errorBody"
-                }
-                val errorMessage = if (response.statusCode.is4xxClientError)
-                    "Underdokumenter ikke funnet"
-                else
-                    "Serverfeil ved henting av underdokumenter"
-                throw ResponseStatusException(response.statusCode, errorMessage)
-            }
-            .toEntity<U020SubdocumentsCollection>()
-        return entity.body!!
-    }
+    fun getSubdocuments(caseId: Int, documentId: String): U020SubdocumentsCollection = restClient
+        .get()
+        .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments")
+        .accept(APPLICATION_JSON)
+        .header("Nav-Call-Id", caseId.toString())
+        .retrieve()
+        .onStatus({ it.is4xxClientError }) { _, response ->
+            val errorBody = String(response.body.readAllBytes())
+            mdc(rinasakId = caseId)
+            log.warn { "HTTP ${response.statusCode.value()} client error for subdocuments of document $documentId: $errorBody" }
+            throw ResponseStatusException(response.statusCode, "Underdokumenter ikke funnet")
+        }
+        .onStatus({ it.is5xxServerError }) { _, response ->
+            val errorBody = String(response.body.readAllBytes())
+            mdc(rinasakId = caseId)
+            log.error { "HTTP ${response.statusCode.value()} server error for subdocuments of document $documentId: $errorBody" }
+            throw ResponseStatusException(response.statusCode, "Serverfeil ved henting av underdokumenter")
+        }
+        .toEntity<U020SubdocumentsCollection>()
+        .body!!
 
-    fun getSubdocument(caseId: Int, documentId: String, subdocumentId: String): U020ChildDocument {
-        val entity: ResponseEntity<U020ChildDocument> = restClient
+    fun getSubdocument(caseId: Int, documentId: String, subdocumentId: String): U020ChildDocument =
+        restClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments/$subdocumentId")
             .accept(APPLICATION_JSON)
             .header("Nav-Call-Id", caseId.toString())
             .retrieve()
-            .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+            .onStatus({ it.is4xxClientError }) { _, response ->
                 val errorBody = String(response.body.readAllBytes())
-                log.error {
-                    "HTTP ${response.statusCode.value()} error for subdocument $subdocumentId of document $documentId in case $caseId: $errorBody"
-                }
-                val errorMessage = if (response.statusCode.is4xxClientError)
-                    "Underdokument ikke funnet"
-                else
-                    "Serverfeil ved henting av underdokument"
-                throw ResponseStatusException(response.statusCode, errorMessage)
+                mdc(rinasakId = caseId)
+                log.warn { "HTTP ${response.statusCode.value()} client error for subdocument $subdocumentId of document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Underdokument ikke funnet")
+            }
+            .onStatus({ it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                mdc(rinasakId = caseId)
+                log.error { "HTTP ${response.statusCode.value()} server error for subdocument $subdocumentId of document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Serverfeil ved henting av underdokument")
             }
             .toEntity<U020ChildDocument>()
-        return entity.body!!
-    }
+            .body!!
 }

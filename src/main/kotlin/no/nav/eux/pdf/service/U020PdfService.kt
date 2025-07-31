@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException
 
 @Service
 class U020PdfService(
-    private val rinaClient: RinaClient
+    val rinaClient: RinaClient
 ) {
 
     fun u020Pdf(
@@ -31,7 +31,7 @@ class U020PdfService(
         return pdfGen.generateU020Document(master, claims)
     }
 
-    private fun mapToU020Master(rinasakId: String, master: U020MasterContent): U020Master {
+     fun mapToU020Master(rinasakId: String, master: U020MasterContent): U020Master {
         val generalInfo = master.generalInformation
         val totalAmount = generalInfo.totalAmountRequested
         val bankInfo = generalInfo.bankInformation
@@ -49,7 +49,7 @@ class U020PdfService(
         )
     }
 
-    private fun mapToU020Child(childDoc: U020ChildDocument): U020Child {
+     fun mapToU020Child(childDoc: U020ChildDocument): U020Child {
         val child = childDoc.u020Child
         val claim = child.individualClaim
         val person = claim.person.personIdentification

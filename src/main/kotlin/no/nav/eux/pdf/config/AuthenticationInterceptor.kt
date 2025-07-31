@@ -12,9 +12,9 @@ import org.springframework.web.client.toEntity
 import org.springframework.web.server.ResponseStatusException
 
 const val casServiceId = "../portal_new/cas/cpi"
-private const val requestHeaderXsrfToken = "X-XSRF-TOKEN"
-private const val headerSetCookie = "Set-Cookie"
-private const val headerXAuthCookie = "X-Auth-Cookie"
+const val requestHeaderXsrfToken = "X-XSRF-TOKEN"
+const val headerSetCookie = "Set-Cookie"
+const val headerXAuthCookie = "X-Auth-Cookie"
 
 open class AuthenticationInterceptor(
     private val rinaCpiServiceProperties: RinaCpiServiceProperties,
