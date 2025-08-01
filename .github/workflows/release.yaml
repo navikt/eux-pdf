@@ -74,20 +74,20 @@ jobs:
       docker-image: >
         ${{ steps.docker-build-push.outputs.image }}
 
-#  deploy-q1:
-#    name: 'Deploy to q1'
-#    runs-on: ubuntu-latest
-#    needs: build
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: 'Calling nais deploy action for q1'
-#        uses: nais/deploy/actions/deploy@v2
-#        env:
-#          CLUSTER: dev-gcp
-#          RESOURCE: .nais/nais.yaml
-#          VAR: image=${{ needs.build.outputs.docker-image }}
-#          VARS: .nais/q1.yaml
-#          PRINT_PAYLOAD: true
+  deploy-q1:
+    name: 'Deploy to q1'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Calling nais deploy action for q1'
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/nais.yaml
+          VAR: image=${{ needs.build.outputs.docker-image }}
+          VARS: .nais/q1.yaml
+          PRINT_PAYLOAD: true
 
   deploy-q2:
     name: 'Deploy to q2'
@@ -104,17 +104,17 @@ jobs:
           VARS: .nais/q2.yaml
           PRINT_PAYLOAD: true
 
-#  deploy-prod:
-#    name: 'Deploy to Production'
-#    runs-on: ubuntu-latest
-#    needs: [build, deploy-q1, deploy-q2]
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: 'Calling nais deploy action for production'
-#        uses: nais/deploy/actions/deploy@v2
-#        env:
-#          CLUSTER: prod-gcp
-#          RESOURCE: .nais/nais.yaml
-#          VAR: image=${{ needs.build.outputs.docker-image }}
-#          VARS: .nais/prod.yaml
-#          PRINT_PAYLOAD: true
+  deploy-prod:
+    name: 'Deploy to Production'
+    runs-on: ubuntu-latest
+    needs: [build, deploy-q1, deploy-q2]
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Calling nais deploy action for production'
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/nais.yaml
+          VAR: image=${{ needs.build.outputs.docker-image }}
+          VARS: .nais/prod.yaml
+          PRINT_PAYLOAD: true

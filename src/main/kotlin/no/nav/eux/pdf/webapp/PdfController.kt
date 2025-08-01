@@ -7,11 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.eux.pdf.client.RinaClient
-import no.nav.eux.pdf.model.domain.U020ChildDocument
-import no.nav.eux.pdf.model.domain.U020MasterDocument
-import no.nav.eux.pdf.model.domain.U020SubdocumentsCollection
-import no.nav.eux.pdf.model.rinasak.RinaCase
 import no.nav.eux.pdf.service.U020PdfService
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpHeaders
@@ -28,19 +23,8 @@ import org.springframework.web.bind.annotation.RestController
 @Protected
 @Tag(name = "PDF Generation", description = "API for generating PDF documents from RINA/EESSI data")
 class PdfController(
-    val u020PdfService: U020PdfService,
-    val rinaClient: RinaClient
+    val u020PdfService: U020PdfService
 ) {
-
-    @GetMapping("/test")
-    @Operation(
-        summary = "Health check endpoint",
-        description = "Simple endpoint to verify that the PDF service is running and accessible"
-    )
-    @ApiResponse(responseCode = "200", description = "Service is running")
-    fun test(): String {
-        return "PDF Service is running - Test endpoint working!"
-    }
 
     @GetMapping("/rinasak/{caseId}/document/u020/{documentId}", produces = [APPLICATION_PDF_VALUE])
     @Operation(
@@ -107,39 +91,5 @@ class PdfController(
         return ResponseEntity.ok()
             .headers(headers)
             .body(pdfBytes)
-    }
-
-    @GetMapping("/rinasak/{rinasakId}")
-    fun getRinaCase(@PathVariable rinasakId: Int): ResponseEntity<RinaCase> {
-        val rinaCase = rinaClient.rinasak(rinasakId)
-        return ResponseEntity.ok(rinaCase)
-    }
-
-    @GetMapping("/rinasak/{caseId}/document/{documentId}")
-    fun getDocument(
-        @PathVariable caseId: Int,
-        @PathVariable documentId: String
-    ): ResponseEntity<U020MasterDocument> {
-        val document = rinaClient.getDocument(caseId, documentId)
-        return ResponseEntity.ok(document)
-    }
-
-    @GetMapping("/rinasak/{caseId}/document/{documentId}/subdocuments")
-    fun getSubdocuments(
-        @PathVariable caseId: Int,
-        @PathVariable documentId: String
-    ): ResponseEntity<U020SubdocumentsCollection> {
-        val subdocuments = rinaClient.getSubdocuments(caseId, documentId)
-        return ResponseEntity.ok(subdocuments)
-    }
-
-    @GetMapping("/rinasak/{caseId}/document/{documentId}/subdocuments/{subdocumentId}")
-    fun getSubdocument(
-        @PathVariable caseId: Int,
-        @PathVariable documentId: String,
-        @PathVariable subdocumentId: String
-    ): ResponseEntity<U020ChildDocument> {
-        val subdocument = rinaClient.getSubdocument(caseId, documentId, subdocumentId)
-        return ResponseEntity.ok(subdocument)
     }
 }

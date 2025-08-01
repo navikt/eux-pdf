@@ -5,7 +5,7 @@ application:
   eux-rina-api:
     name: eux-rina-api-q1
     namespace: eessibasis
-  user-secret: eux-rina-terminator-api-q1
+  user-secret: eux-pdf-q1
 
 cluster:
   fss: dev-fss

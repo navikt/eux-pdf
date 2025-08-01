@@ -5,7 +5,7 @@ application:
   eux-rina-api:
     name: eux-rina-api
     namespace: eessibasis
-  user-secret: eux-rina-terminator-api
+  user-secret: eux-pdf
 
 cluster:
   fss: prod-fss
