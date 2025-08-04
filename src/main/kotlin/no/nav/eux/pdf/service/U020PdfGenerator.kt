@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 data class U020Master(
@@ -76,11 +77,12 @@ class EessiU020PdfGen {
     val pageHeight = PDRectangle.A4.height
     val marginLeft = 50f
     val marginRight = 50f
-    val marginTop = 50f
+    val marginTop = 40f
     val marginBottom = 50f
-    val lineHeight = 20f
+    val lineHeight = 16f
     val boldFont = PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
     val regularFont = PDType1Font(Standard14Fonts.FontName.HELVETICA)
+    val italicFont = PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
 
     fun generateU020Document(master: U020Master, claims: List<U020Child>): ByteArray =
         try {
@@ -120,18 +122,15 @@ class EessiU020PdfGen {
         }
 
         private fun writeFooter() {
-            // Footer positioning
             val footerY = marginBottom - 15f
             val footerLineY = marginBottom - 5f
 
-            // Left side: U020 text
             contentStream.beginText()
             contentStream.setFont(regularFont, 9f)
             contentStream.newLineAtOffset(marginLeft, footerY)
             contentStream.showText("U020")
             contentStream.endText()
 
-            // Right side: Page number
             val pageText = "Side $pageNumber"
             val pageTextWidth = regularFont.getStringWidth(pageText) / 1000 * 9f
             contentStream.beginText()
@@ -140,7 +139,6 @@ class EessiU020PdfGen {
             contentStream.showText(pageText)
             contentStream.endText()
 
-            // Draw a subtle line above the footer
             contentStream.setLineWidth(0.5f)
             contentStream.moveTo(marginLeft, footerLineY)
             contentStream.lineTo(pageWidth - marginRight, footerLineY)
@@ -159,114 +157,154 @@ class EessiU020PdfGen {
         }
 
         fun writeDocumentTitle() {
-            checkPageSpace(30f)
+            checkPageSpace(40f)
+
+            contentStream.setLineWidth(2f)
+            contentStream.setStrokingColor(0.3f, 0.3f, 0.3f)
+            contentStream.moveTo(marginLeft, currentY + 5f)
+            contentStream.lineTo(pageWidth - marginRight, currentY + 5f)
+            contentStream.stroke()
+
+            currentY -= 15f
+
             contentStream.beginText()
-            contentStream.setFont(boldFont, 16f)
+            contentStream.setFont(boldFont, 18f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText("U020 - Forespørsel om refusjon")
             contentStream.endText()
-            currentY -= 30f
+
+            currentY -= 25f
         }
 
         fun writeGeneratedDate() {
             checkPageSpace()
-            val dateString = "PDF Generert: ${LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)}"
+            val dateString = "Generert: ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy 'kl.' HH:mm"))}"
             contentStream.beginText()
-            contentStream.setFont(regularFont, 8f)
+            contentStream.setFont(italicFont, 8f)
+            contentStream.setNonStrokingColor(0.5f, 0.5f, 0.5f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText(dateString)
             contentStream.endText()
+            contentStream.setNonStrokingColor(0f, 0f, 0f) // Reset to black
             currentY -= lineHeight
         }
 
         fun writeSectionHeader(title: String) {
-            checkPageSpace(25f)
+            checkPageSpace(30f)
+            addBlankLine()
+
             contentStream.beginText()
-            contentStream.setFont(boldFont, 14f)
+            contentStream.setFont(boldFont, 12f)
             contentStream.newLineAtOffset(marginLeft, currentY)
-            contentStream.showText(title)
+            contentStream.showText(title.uppercase())
             contentStream.endText()
             currentY -= 25f
         }
 
         fun writeSubsectionHeader(title: String) {
-            checkPageSpace()
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 12f)
-            contentStream.newLineAtOffset(marginLeft + 20f, currentY)
-            contentStream.showText(title)
-            contentStream.endText()
-            currentY -= lineHeight
-        }
-
-        fun writeKeyValuePair(key: String, value: String) {
-            checkPageSpace()
-            val keyText = "$key "
-            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 10f
-
+            checkPageSpace(20f)
             contentStream.beginText()
             contentStream.setFont(boldFont, 10f)
-            contentStream.newLineAtOffset(marginLeft + 40f, currentY)
+            contentStream.setNonStrokingColor(0.2f, 0.2f, 0.2f)
+            contentStream.newLineAtOffset(marginLeft + 10f, currentY)
+            contentStream.showText(title)
+            contentStream.endText()
+            contentStream.setNonStrokingColor(0f, 0f, 0f)
+            currentY -= 18f
+        }
+
+        fun writeKeyValuePair(key: String, value: String, indent: Float = 20f) {
+            checkPageSpace()
+            val keyText = "$key:"
+            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 9f
+
+            contentStream.beginText()
+            contentStream.setFont(boldFont, 9f)
+            contentStream.newLineAtOffset(marginLeft + indent, currentY)
             contentStream.showText(keyText)
             contentStream.endText()
 
             contentStream.beginText()
-            contentStream.setFont(regularFont, 10f)
-            contentStream.newLineAtOffset(marginLeft + 40f + keyWidth, currentY)
+            contentStream.setFont(regularFont, 9f)
+            contentStream.newLineAtOffset(marginLeft + indent + keyWidth + 5f, currentY)
             contentStream.showText(value)
             contentStream.endText()
 
             currentY -= lineHeight
         }
 
+        fun writeCompactKeyValuePair(key: String, value: String, startX: Float) {
+            val keyText = "$key:"
+            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 8f
+
+            contentStream.beginText()
+            contentStream.setFont(boldFont, 8f)
+            contentStream.newLineAtOffset(startX, currentY)
+            contentStream.showText(keyText)
+            contentStream.endText()
+
+            contentStream.beginText()
+            contentStream.setFont(regularFont, 8f)
+            contentStream.newLineAtOffset(startX + keyWidth + 3f, currentY)
+            contentStream.showText(value)
+            contentStream.endText()
+        }
+
         fun addBlankLine() {
-            currentY -= lineHeight / 2
+            currentY -= lineHeight * 0.8f
+        }
+
+        fun addSmallSpace() {
+            currentY -= lineHeight * 0.3f
         }
 
         fun writeMasterInformation(master: U020Master) {
-            writeSectionHeader("Generell Informasjon")
+            writeSectionHeader("Dokumentinformasjon")
 
-            writeKeyValuePair("SED Versjon:", "${master.sedGVer}.${master.sedVer}")
-            writeKeyValuePair("ID-nummer for krav om refusjon:", master.reimbursementRequestID)
-            writeKeyValuePair("Antall enkeltkrav:", master.numberIndividualClaims)
+            writeKeyValuePair("SED-versjon", "${master.sedGVer}.${master.sedVer}")
+            writeKeyValuePair("Forespørsel-ID", master.reimbursementRequestID)
+            writeKeyValuePair("Antall krav", master.numberIndividualClaims)
 
-            addBlankLine()
-            writeSubsectionHeader("Bankinformasjon")
+            writeSectionHeader("Bankinformasjon")
 
-            writeKeyValuePair("Anmodet Totalbeløp:", "${master.totalAmount} ${master.currency}")
-            writeKeyValuePair("IBAN:", master.iban)
-            writeKeyValuePair("Bank Reference:", master.bankReference)
-
+            writeKeyValuePair("Totalbeløp", "${master.totalAmount} ${master.currency}")
+            writeKeyValuePair("IBAN", master.iban)
             master.bicSwift?.let {
-                writeKeyValuePair("BIC/SWIFT:", it)
+                writeKeyValuePair("BIC/SWIFT", it)
             }
-
-            addBlankLine()
+            writeKeyValuePair("Referanse", master.bankReference)
 
             master.localCaseNumbers?.let { cases ->
-                writeSubsectionHeader("Lokale saksnumre")
-                cases.forEach { case ->
-                    writeKeyValuePair("Land:", case.country)
-                    writeKeyValuePair("Saksnummer:", case.caseNumber)
-                    writeKeyValuePair("Institusjon:", "${case.institutionName} (${case.institutionID})")
-                    addBlankLine()
+                if (cases.isNotEmpty()) {
+                    writeSectionHeader("Lokale saksnummer")
+                    cases.forEach { case ->
+                        writeSubsectionHeader("${case.country} - ${case.caseNumber}")
+                        writeKeyValuePair("Institusjon", case.institutionName, 30f)
+                        writeKeyValuePair("Institusjon-ID", case.institutionID, 30f)
+                        addSmallSpace()
+                    }
                 }
             }
         }
 
         fun writeIndividualClaims(claims: List<U020Child>) {
-            claims.forEachIndexed { index, claim ->
-                // Calculate required space more accurately with new fields
-                var additionalLines = 0
-                if (claim.familyNameAtBirth != null) additionalLines++
-                if (claim.forenameAtBirth != null) additionalLines++
-                if (claim.nationality != null) additionalLines++
-                if (claim.personalIdentificationNumbers?.isNotEmpty() == true)
-                    additionalLines += claim.personalIdentificationNumbers.size
-                if (claim.placeBirth != null) additionalLines++
+            if (claims.isEmpty()) return
 
-                val requiredSpace = lineHeight + ((9 + additionalLines) * lineHeight) +
-                        if (index < claims.size - 1) lineHeight / 2 else 0f
+            writeFooter()
+            contentStream.close()
+            currentPage = createNewPage()
+            contentStream = PDPageContentStream(document, currentPage)
+            currentY = pageHeight - marginTop
+            pageNumber++
+
+            writeSectionHeader("Enkeltkrav")
+
+            claims.forEachIndexed { index, claim ->
+                var additionalLines = 6
+                if (claim.personalIdentificationNumbers?.isNotEmpty() == true)
+                    additionalLines += claim.personalIdentificationNumbers.size + 1
+
+                val requiredSpace = 120f + (additionalLines * lineHeight)
 
                 if (currentY - requiredSpace < marginBottom + 30f) {
                     writeFooter()
@@ -277,75 +315,103 @@ class EessiU020PdfGen {
                     pageNumber++
                 }
 
-                writeSubsectionHeader("Krav #${index + 1}")
+                writeSubsectionHeader("Krav ${index + 1}")
 
-                // Personal identification numbers if available
+                // Person identification numbers - compact format at top
                 claim.personalIdentificationNumbers?.let { pins ->
                     if (pins.isNotEmpty()) {
                         contentStream.beginText()
-                        contentStream.setFont(boldFont, 10f)
-                        contentStream.newLineAtOffset(marginLeft + 40f, currentY)
-                        contentStream.showText("Personidentifikasjonsnummer:")
+                        contentStream.setFont(italicFont, 8f)
+                        contentStream.setNonStrokingColor(0.4f, 0.4f, 0.4f)
+                        contentStream.newLineAtOffset(marginLeft + 30f, currentY)
+                        contentStream.showText("ID-nummer:")
                         contentStream.endText()
-                        currentY -= lineHeight
+                        currentY -= 12f
 
                         pins.forEach { pin ->
                             contentStream.beginText()
-                            contentStream.setFont(regularFont, 9f)
-                            contentStream.newLineAtOffset(marginLeft + 60f, currentY)
-                            contentStream.showText("${pin.country}: ${pin.personalIdentificationNumber} (${pin.sector}, ${pin.institutionName})")
+                            contentStream.setFont(regularFont, 8f)
+                            contentStream.setNonStrokingColor(0.3f, 0.3f, 0.3f)
+                            contentStream.newLineAtOffset(marginLeft + 45f, currentY)
+                            contentStream.showText("${pin.country}: ${pin.personalIdentificationNumber} (${pin.sector})")
                             contentStream.endText()
-                            currentY -= (lineHeight * 0.9f)
+                            currentY -= 11f
                         }
-                        addBlankLine()
+                        contentStream.setNonStrokingColor(0f, 0f, 0f)
+                        addSmallSpace()
                     }
                 }
 
-                // Basic person information
-                writeKeyValuePair("Navn:", "${claim.forename} ${claim.familyName}")
+                val leftColumnX = marginLeft + 30f
+                val rightColumnX = marginLeft + 280f
 
-                // Birth names if available
-                claim.familyNameAtBirth?.let {
-                    writeKeyValuePair("Etternavn ved fødsel:", it)
-                }
-                claim.forenameAtBirth?.let {
-                    writeKeyValuePair("Fornavn ved fødsel:", it)
-                }
+                // Left column
+                val savedY = currentY
+                writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", leftColumnX)
+                currentY -= 12f
 
-                writeKeyValuePair("Fødselsdato:", formatDate(claim.dateBirth))
-                writeKeyValuePair("Kjønn:", getSexDescription(claim.sex))
+                writeCompactKeyValuePair("Etternavn ved fødsel", claim.familyNameAtBirth ?: "-", leftColumnX)
+                currentY -= 12f
+                writeCompactKeyValuePair("Fornavn ved fødsel", claim.forenameAtBirth ?: "-", leftColumnX)
+                currentY -= 12f
 
-                // Nationality if available
-                claim.nationality?.let {
-                    writeKeyValuePair("Nasjonalitet:", it)
-                }
+                // Right column
+                currentY = savedY
+                writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), rightColumnX)
+                currentY -= 12f
+                writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), rightColumnX)
+                currentY -= 12f
 
-                // Place of birth if available
-                claim.placeBirth?.let { place ->
-                    val placeText = listOfNotNull(place.town, place.region, place.country)
+                writeCompactKeyValuePair("Nasjonalitet", claim.nationality ?: "-", rightColumnX)
+                currentY -= 12f
+
+                val placeText = claim.placeBirth?.let { place ->
+                    listOfNotNull(place.town, place.region, place.country)
                         .filter { it.isNotBlank() }
                         .joinToString(", ")
-                    if (placeText.isNotBlank()) {
-                        writeKeyValuePair("Fødselssted:", placeText)
-                    }
-                }
+                        .takeIf { it.isNotBlank() }
+                } ?: "-"
+                writeCompactKeyValuePair("Fødselssted", placeText, rightColumnX)
+                currentY -= 12f
 
-                writeKeyValuePair("Krav-ID:", claim.reimbursementRequestID)
-                writeKeyValuePair("Sekvensnummer:", claim.sequentialNumber)
-                writeKeyValuePair("Institusjon:", "${claim.institutionName} (${claim.institutionID})")
-                writeKeyValuePair(
-                    "Arbeidsperiode:",
-                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}"
-                )
-                writeKeyValuePair(
-                    "Refusjonsperiode:",
-                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}"
-                )
-                writeKeyValuePair("Siste utbetalingsdato:", formatDate(claim.lastPaymentDate))
-                writeKeyValuePair("Anmodet refusjonsbeløp:", "${claim.requestedAmount} ${claim.requestedCurrency}")
+                currentY = minOf(currentY, savedY - 48f)
 
-                if (index < claims.size - 1)
+                contentStream.setLineWidth(0.5f)
+                contentStream.setStrokingColor(0.8f, 0.8f, 0.8f)
+                contentStream.moveTo(leftColumnX, currentY)
+                contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
+                contentStream.stroke()
+                currentY -= 12f
+
+                contentStream.beginText()
+                contentStream.setFont(boldFont, 8f)
+                contentStream.newLineAtOffset(leftColumnX, currentY)
+                contentStream.showText("KRAVDETALJER")
+                contentStream.endText()
+                currentY -= 15f
+
+                writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, leftColumnX)
+                writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", rightColumnX)
+                currentY -= 12f
+
+                writeCompactKeyValuePair("Arbeidsperiode",
+                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", leftColumnX)
+                writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), rightColumnX)
+                currentY -= 12f
+
+                writeCompactKeyValuePair("Refusjonsperiode",
+                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}", leftColumnX)
+                writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", rightColumnX)
+                currentY -= 15f
+
+                if (index < claims.size - 1) {
+                    contentStream.setLineWidth(0.5f)
+                    contentStream.setStrokingColor(0.9f, 0.9f, 0.9f)
+                    contentStream.moveTo(marginLeft + 20f, currentY)
+                    contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
+                    contentStream.stroke()
                     addBlankLine()
+                }
             }
 
             writeFooter()
@@ -353,12 +419,12 @@ class EessiU020PdfGen {
         }
 
         fun writeRinasakIdTopRight(rinasakId: String) {
-            val text = "Saksnummer: $rinasakId"
-            val textWidth = regularFont.getStringWidth(text) / 1000 * 8f
+            val text = "Saksnr: $rinasakId"
+            val textWidth = boldFont.getStringWidth(text) / 1000 * 8f
 
             contentStream.beginText()
-            contentStream.setFont(regularFont, 9f)
-            contentStream.newLineAtOffset(pageWidth - marginRight - textWidth, pageHeight - marginTop)
+            contentStream.setFont(boldFont, 8f)
+            contentStream.newLineAtOffset(pageWidth - marginRight - textWidth, pageHeight - marginTop - 10f)
             contentStream.showText(text)
             contentStream.endText()
         }
