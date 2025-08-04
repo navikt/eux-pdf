@@ -17,11 +17,15 @@ class U020PdfService(
         documentId: String
     ): ByteArray {
         val masterDocument = rinaClient.getDocument(caseId, documentId)
+        rinaClient
+            .getDocumentStringTest(caseId, documentId)
+            .also { println(it) }
         val masterDocumentContent = masterDocument.u020Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U020 master ikke funnet")
         val subdocumentsCollection = rinaClient.getSubdocuments(caseId, documentId)
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
+                rinaClient.getSubdocumentStringTest(caseId, documentId, subdocument.id)
                 rinaClient.getSubdocument(caseId, documentId, subdocument.id)
             }
         }

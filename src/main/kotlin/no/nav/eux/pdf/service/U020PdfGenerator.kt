@@ -83,6 +83,7 @@ class EessiU020PdfGen {
         var currentPage: PDPage = createNewPage()
         var contentStream: PDPageContentStream = PDPageContentStream(document, currentPage)
         var currentY: Float = pageHeight - marginTop
+        var pageNumber: Int = 1
 
         private fun createNewPage(): PDPage {
             val page = PDPage(PDRectangle.A4)
@@ -90,12 +91,45 @@ class EessiU020PdfGen {
             return page
         }
 
+        private fun writeFooter() {
+            // Save current position
+            val savedY = currentY
+
+            // Footer positioning
+            val footerY = marginBottom - 15f
+            val footerLineY = marginBottom - 5f
+
+            // Left side: U020 text
+            contentStream.beginText()
+            contentStream.setFont(regularFont, 9f)
+            contentStream.newLineAtOffset(marginLeft, footerY)
+            contentStream.showText("U020")
+            contentStream.endText()
+
+            // Right side: Page number
+            val pageText = "Side $pageNumber"
+            val pageTextWidth = regularFont.getStringWidth(pageText) / 1000 * 9f
+            contentStream.beginText()
+            contentStream.setFont(regularFont, 9f)
+            contentStream.newLineAtOffset(pageWidth - marginRight - pageTextWidth, footerY)
+            contentStream.showText(pageText)
+            contentStream.endText()
+
+            // Draw a subtle line above the footer
+            contentStream.setLineWidth(0.5f)
+            contentStream.moveTo(marginLeft, footerLineY)
+            contentStream.lineTo(pageWidth - marginRight, footerLineY)
+            contentStream.stroke()
+        }
+
         private fun checkPageSpace(requiredSpace: Float = lineHeight) {
-            if (currentY - requiredSpace < marginBottom) {
+            if (currentY - requiredSpace < marginBottom + 30f) {
+                writeFooter()
                 contentStream.close()
                 currentPage = createNewPage()
                 contentStream = PDPageContentStream(document, currentPage)
                 currentY = pageHeight - marginTop
+                pageNumber++
             }
         }
 
@@ -185,11 +219,16 @@ class EessiU020PdfGen {
             claims.forEachIndexed { index, claim ->
                 val requiredSpace = lineHeight + (9 * lineHeight) + if (index < claims.size - 1) lineHeight / 2 else 0f
 
-                if (currentY - requiredSpace < marginBottom) {
+                if (currentY - requiredSpace < marginBottom + 30f) { // Extra space for footer
+                    // Write footer before closing the page
+                    writeFooter()
                     contentStream.close()
+
+                    // Create new page
                     currentPage = createNewPage()
                     contentStream = PDPageContentStream(document, currentPage)
                     currentY = pageHeight - marginTop
+                    pageNumber++
                 }
 
                 writeSubsectionHeader("Krav #${index + 1}")
@@ -214,6 +253,8 @@ class EessiU020PdfGen {
                     addBlankLine()
             }
 
+            // Write footer on the final page before closing
+            writeFooter()
             contentStream.close()
         }
 
