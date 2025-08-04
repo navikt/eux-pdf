@@ -37,7 +37,13 @@ data class PersonIdentification(
     val familyName: String,
     val forename: String,
     val dateBirth: String,
-    val sex: Sex
+    val sex: Sex,
+    val familyNameAtBirth: String? = null,
+    val forenameAtBirth: String? = null,
+    @JsonProperty("PINPersonInEachInstitution")
+    val pinPersonInEachInstitution: PinPersonInEachInstitution? = null,
+    @JsonProperty("IfPINNotProvidedForEveryInstitutionPleaseProvide")
+    val ifPinNotProvidedForEveryInstitutionPleaseProvide: IfPinNotProvidedForEveryInstitutionPleaseProvide? = null
 )
 
 data class Sex(
@@ -72,4 +78,32 @@ data class ReimbursementPeriod(
 data class RequestedAmountForReimbursement(
     val amount: String,
     val currency: Currency
+)
+
+data class PinPersonInEachInstitution(
+    @JsonProperty("PersonalIdentificationNumber")
+    val personalIdentificationNumber: List<PersonalIdentificationNumber>? = null
+)
+
+data class PersonalIdentificationNumber(
+    val country: Country,
+    val personalIdentificationNumber: String,
+    val sector: Sector,
+    @JsonProperty("Institution")
+    val institution: Institution
+)
+
+data class Sector(
+    val value: List<String>
+)
+
+data class IfPinNotProvidedForEveryInstitutionPleaseProvide(
+    @JsonProperty("PlaceBirth")
+    val placeBirth: PlaceBirth? = null
+)
+
+data class PlaceBirth(
+    val town: String? = null,
+    val region: String? = null,
+    val country: Country? = null
 )

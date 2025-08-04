@@ -41,6 +41,16 @@ class U020PdfService(
         val generalInfo = master.generalInformation
         val totalAmount = generalInfo.totalAmountRequested
         val bankInfo = generalInfo.bankInformation
+
+        val localCaseNumbers = master.localCaseNumbers?.localCaseNumber?.map { localCase ->
+            LocalCaseInfo(
+                country = localCase.country.value.firstOrNull() ?: "",
+                caseNumber = localCase.caseNumber,
+                institutionID = localCase.institution.institutionID,
+                institutionName = localCase.institution.institutionName
+            )
+        }
+
         return U020Master(
             rinasakId = rinasakId,
             sedGVer = master.sedGVer,
@@ -51,7 +61,9 @@ class U020PdfService(
             totalAmount = totalAmount.amount,
             currency = totalAmount.currency.value.firstOrNull() ?: "",
             iban = bankInfo.sepaBankDetails.iban,
-            bankReference = bankInfo.bankTransferSubjectOrTransactionReference
+            bicSwift = bankInfo.sepaBankDetails.bicSwift,
+            bankReference = bankInfo.bankTransferSubjectOrTransactionReference,
+            localCaseNumbers = localCaseNumbers
         )
     }
 
@@ -64,11 +76,40 @@ class U020PdfService(
         val reimbursementPeriod = claim.reimbursementPeriod
         val requestedAmount = claim.requestedAmountForReimbursement
         val workingPeriod = workingPeriods.firstOrNull()
+
+        // Map personal identification numbers
+        val personalIdNumbers = person.pinPersonInEachInstitution?.personalIdentificationNumber?.map { pin ->
+            PersonIdInfo(
+                country = pin.country.value.firstOrNull() ?: "",
+                personalIdentificationNumber = pin.personalIdentificationNumber,
+                sector = pin.sector.value.firstOrNull() ?: "",
+                institutionID = pin.institution.institutionID,
+                institutionName = pin.institution.institutionName
+            )
+        }
+
+        // Map place of birth
+        val placeBirth = person.ifPinNotProvidedForEveryInstitutionPleaseProvide?.placeBirth?.let { place ->
+            PlaceBirthInfo(
+                town = place.town,
+                region = place.region,
+                country = place.country?.value?.firstOrNull()
+            )
+        }
+
+        // Extract nationality (assuming it's in additional person information if available)
+        val nationality = null // This would need to be mapped from AdditionalInformationPerson if available
+
         return U020Child(
             familyName = person.familyName,
             forename = person.forename,
             dateBirth = person.dateBirth,
             sex = person.sex.value.firstOrNull() ?: "",
+            familyNameAtBirth = person.familyNameAtBirth,
+            forenameAtBirth = person.forenameAtBirth,
+            personalIdentificationNumbers = personalIdNumbers,
+            placeBirth = placeBirth,
+            nationality = nationality,
             reimbursementRequestID = claim.reimbursementRequestID,
             sequentialNumber = claim.sequentialNumberIndividualClaim,
             institutionID = institution.institutionID,

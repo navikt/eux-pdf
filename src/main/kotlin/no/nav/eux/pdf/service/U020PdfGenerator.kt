@@ -21,7 +21,16 @@ data class U020Master(
     val totalAmount: String,
     val currency: String,
     val iban: String,
-    val bankReference: String
+    val bicSwift: String? = null,
+    val bankReference: String,
+    val localCaseNumbers: List<LocalCaseInfo>? = null
+)
+
+data class LocalCaseInfo(
+    val country: String,
+    val caseNumber: String,
+    val institutionID: String,
+    val institutionName: String
 )
 
 data class U020Child(
@@ -29,6 +38,11 @@ data class U020Child(
     val forename: String,
     val dateBirth: String,
     val sex: String,
+    val familyNameAtBirth: String? = null,
+    val forenameAtBirth: String? = null,
+    val personalIdentificationNumbers: List<PersonIdInfo>? = null,
+    val placeBirth: PlaceBirthInfo? = null,
+    val nationality: String? = null,
     val reimbursementRequestID: String,
     val sequentialNumber: String,
     val institutionID: String,
@@ -40,6 +54,20 @@ data class U020Child(
     val lastPaymentDate: String,
     val requestedAmount: String,
     val requestedCurrency: String
+)
+
+data class PersonIdInfo(
+    val country: String,
+    val personalIdentificationNumber: String,
+    val sector: String,
+    val institutionID: String,
+    val institutionName: String
+)
+
+data class PlaceBirthInfo(
+    val town: String? = null,
+    val region: String? = null,
+    val country: String? = null
 )
 
 class EessiU020PdfGen {
@@ -92,9 +120,6 @@ class EessiU020PdfGen {
         }
 
         private fun writeFooter() {
-            // Save current position
-            val savedY = currentY
-
             // Footer positioning
             val footerY = marginBottom - 15f
             val footerLineY = marginBottom - 5f
@@ -211,20 +236,41 @@ class EessiU020PdfGen {
             writeKeyValuePair("Anmodet Totalbeløp:", "${master.totalAmount} ${master.currency}")
             writeKeyValuePair("IBAN:", master.iban)
             writeKeyValuePair("Bank Reference:", master.bankReference)
+
+            master.bicSwift?.let {
+                writeKeyValuePair("BIC/SWIFT:", it)
+            }
+
+            addBlankLine()
+
+            master.localCaseNumbers?.let { cases ->
+                writeSubsectionHeader("Lokale saksnumre")
+                cases.forEach { case ->
+                    writeKeyValuePair("Land:", case.country)
+                    writeKeyValuePair("Saksnummer:", case.caseNumber)
+                    writeKeyValuePair("Institusjon:", "${case.institutionName} (${case.institutionID})")
+                    addBlankLine()
+                }
+            }
         }
 
         fun writeIndividualClaims(claims: List<U020Child>) {
-            writeSectionHeader("Enkeltkrav")
-
             claims.forEachIndexed { index, claim ->
-                val requiredSpace = lineHeight + (9 * lineHeight) + if (index < claims.size - 1) lineHeight / 2 else 0f
+                // Calculate required space more accurately with new fields
+                var additionalLines = 0
+                if (claim.familyNameAtBirth != null) additionalLines++
+                if (claim.forenameAtBirth != null) additionalLines++
+                if (claim.nationality != null) additionalLines++
+                if (claim.personalIdentificationNumbers?.isNotEmpty() == true)
+                    additionalLines += claim.personalIdentificationNumbers.size
+                if (claim.placeBirth != null) additionalLines++
 
-                if (currentY - requiredSpace < marginBottom + 30f) { // Extra space for footer
-                    // Write footer before closing the page
+                val requiredSpace = lineHeight + ((9 + additionalLines) * lineHeight) +
+                        if (index < claims.size - 1) lineHeight / 2 else 0f
+
+                if (currentY - requiredSpace < marginBottom + 30f) {
                     writeFooter()
                     contentStream.close()
-
-                    // Create new page
                     currentPage = createNewPage()
                     contentStream = PDPageContentStream(document, currentPage)
                     currentY = pageHeight - marginTop
@@ -233,9 +279,58 @@ class EessiU020PdfGen {
 
                 writeSubsectionHeader("Krav #${index + 1}")
 
+                // Personal identification numbers if available
+                claim.personalIdentificationNumbers?.let { pins ->
+                    if (pins.isNotEmpty()) {
+                        contentStream.beginText()
+                        contentStream.setFont(boldFont, 10f)
+                        contentStream.newLineAtOffset(marginLeft + 40f, currentY)
+                        contentStream.showText("Personidentifikasjonsnummer:")
+                        contentStream.endText()
+                        currentY -= lineHeight
+
+                        pins.forEach { pin ->
+                            contentStream.beginText()
+                            contentStream.setFont(regularFont, 9f)
+                            contentStream.newLineAtOffset(marginLeft + 60f, currentY)
+                            contentStream.showText("${pin.country}: ${pin.personalIdentificationNumber} (${pin.sector}, ${pin.institutionName})")
+                            contentStream.endText()
+                            currentY -= (lineHeight * 0.9f)
+                        }
+                        addBlankLine()
+                    }
+                }
+
+                // Basic person information
                 writeKeyValuePair("Navn:", "${claim.forename} ${claim.familyName}")
+
+                // Birth names if available
+                claim.familyNameAtBirth?.let {
+                    writeKeyValuePair("Etternavn ved fødsel:", it)
+                }
+                claim.forenameAtBirth?.let {
+                    writeKeyValuePair("Fornavn ved fødsel:", it)
+                }
+
                 writeKeyValuePair("Fødselsdato:", formatDate(claim.dateBirth))
                 writeKeyValuePair("Kjønn:", getSexDescription(claim.sex))
+
+                // Nationality if available
+                claim.nationality?.let {
+                    writeKeyValuePair("Nasjonalitet:", it)
+                }
+
+                // Place of birth if available
+                claim.placeBirth?.let { place ->
+                    val placeText = listOfNotNull(place.town, place.region, place.country)
+                        .filter { it.isNotBlank() }
+                        .joinToString(", ")
+                    if (placeText.isNotBlank()) {
+                        writeKeyValuePair("Fødselssted:", placeText)
+                    }
+                }
+
+                writeKeyValuePair("Krav-ID:", claim.reimbursementRequestID)
                 writeKeyValuePair("Sekvensnummer:", claim.sequentialNumber)
                 writeKeyValuePair("Institusjon:", "${claim.institutionName} (${claim.institutionID})")
                 writeKeyValuePair(
@@ -253,7 +348,6 @@ class EessiU020PdfGen {
                     addBlankLine()
             }
 
-            // Write footer on the final page before closing
             writeFooter()
             contentStream.close()
         }
