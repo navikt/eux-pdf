@@ -25,7 +25,9 @@ class U020PdfService(
         val subdocumentsCollection = rinaClient.getSubdocuments(caseId, documentId)
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
-                rinaClient.getSubdocumentStringTest(caseId, documentId, subdocument.id)
+                rinaClient
+                    .getSubdocumentStringTest(caseId, documentId, subdocument.id)
+                    .also { println(it) }
                 rinaClient.getSubdocument(caseId, documentId, subdocument.id)
             }
         }
