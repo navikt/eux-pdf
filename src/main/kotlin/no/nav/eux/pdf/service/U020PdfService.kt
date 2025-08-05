@@ -77,8 +77,8 @@ class U020PdfService(
                 country = pin.country.value.firstOrNull() ?: "",
                 personalIdentificationNumber = pin.personalIdentificationNumber,
                 sector = pin.sector?.value?.firstOrNull() ?: "",
-                institutionID = pin.institution.institutionID,
-                institutionName = pin.institution.institutionName
+                institutionID = pin.institution?.institutionID ?: "",
+                institutionName = pin.institution?.institutionName ?: ""
             )
         }
 

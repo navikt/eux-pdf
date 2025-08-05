@@ -92,7 +92,7 @@ data class PersonalIdentificationNumber(
     val personalIdentificationNumber: String,
     val sector: Sector?,
     @JsonProperty("Institution")
-    val institution: Institution
+    val institution: Institution?
 )
 
 data class Sector(
