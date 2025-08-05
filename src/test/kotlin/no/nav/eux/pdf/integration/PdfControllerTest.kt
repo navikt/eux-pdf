@@ -2,10 +2,10 @@ package no.nav.eux.pdf.integration
 
 import no.nav.eux.pdf.integration.common.voidHttpEntity
 import no.nav.eux.pdf.integration.config.TestConfig
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 @Import(TestConfig::class)
 @DisplayName("U020 PDF Generation Integration Tests")
 class PdfControllerTest : AbstractPdfApiImplTest() {
-    
+
     @BeforeEach
     fun setUp() {
         requestBodies.clear()
