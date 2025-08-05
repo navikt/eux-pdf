@@ -90,7 +90,7 @@ data class PinPersonInEachInstitution(
 data class PersonalIdentificationNumber(
     val country: Country,
     val personalIdentificationNumber: String,
-    val sector: Sector,
+    val sector: Sector?,
     @JsonProperty("Institution")
     val institution: Institution
 )
