@@ -478,6 +478,24 @@ class EessiU020PdfGen {
                 }
             }
 
+            "FI" -> {
+                if (pnr.length == 11) {
+                    val birthDate = pnr.substring(0, 6)
+                    val centuryMarker = pnr[6]
+                    val validCenturyMarkers = setOf('+', '-', 'Y', 'X', 'W', 'V', 'U', 'T', 'S', 'R', 'Q',
+                        'P', 'N', 'M', 'L', 'K', 'J', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A')
+
+                    if (birthDate.all { it.isDigit() } && centuryMarker in validCenturyMarkers) {
+                        val masked = "*".repeat(4)
+                        "$birthDate$centuryMarker$masked"
+                    } else {
+                        maskGeneric(pnr)
+                    }
+                } else {
+                    maskGeneric(pnr)
+                }
+            }
+
             else -> maskGeneric(pnr)
         }
 
