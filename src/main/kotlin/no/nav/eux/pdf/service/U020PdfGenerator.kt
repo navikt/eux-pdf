@@ -5,10 +5,10 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
+import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts
-import org.apache.pdfbox.pdmodel.font.PDFont
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.LocalDate
@@ -427,18 +427,11 @@ class EessiU020PdfGen {
             contentStream.endText()
         }
 
-        /**
-         * Loads a Unicode-supporting font. Uses built-in system fonts or falls back to Helvetica.
-         */
-        private fun loadUnicodeFont(preferredFont: String): PDFont {
-            return try {
-                // Try to load a system font that supports Unicode
-                // This will work on most systems with Java's built-in font support
+        private fun loadUnicodeFont(preferredFont: String): PDFont = try {
                 val fontStream = javaClass.getResourceAsStream("/fonts/$preferredFont")
                 if (fontStream != null) {
                     PDType0Font.load(document, fontStream)
                 } else {
-                    // Fallback: Use built-in font with character replacement
                     log.info { "Unicode font $preferredFont not found, using system default with character sanitization" }
                     createFallbackFont(preferredFont)
                 }
@@ -446,47 +439,31 @@ class EessiU020PdfGen {
                 log.warn(e) { "Failed to load Unicode font $preferredFont, using fallback" }
                 createFallbackFont(preferredFont)
             }
-        }
 
-        /**
-         * Creates a fallback font using PDFBox built-ins
-         */
-        private fun createFallbackFont(requestedFont: String): PDFont {
-            return try {
-                // Use PDFBox's built-in Liberation fonts which support more Unicode characters
+        private fun createFallbackFont(requestedFont: String): PDFont =
+            try {
                 when {
                     requestedFont.contains("Bold") -> {
-                        // Try to load Liberation Sans Bold from PDFBox resources
-                        val fontStream = this::class.java.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Bold.ttf")
-                        if (fontStream != null) {
-                            fontStream.use { stream ->
-                                PDType0Font.load(document, stream)
-                            }
-                        } else {
-                            // Ultimate fallback - use standard font
+                        val fontStream = this::class.java
+                            .getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Bold.ttf")
+                        fontStream?.use { PDType0Font.load(document, it) } ?: run {
                             log.warn { "No Unicode fonts available, falling back to Helvetica" }
                             PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
                         }
                     }
+
                     requestedFont.contains("Italic") -> {
-                        val fontStream = this::class.java.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Italic.ttf")
-                        if (fontStream != null) {
-                            fontStream.use { stream ->
-                                PDType0Font.load(document, stream)
-                            }
-                        } else {
-                            PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
-                        }
+                        val fontStream = this::class.java
+                            .getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Italic.ttf")
+                        fontStream?.use { PDType0Font.load(document, it) }
+                            ?: PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
                     }
+
                     else -> {
-                        val fontStream = this::class.java.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")
-                        if (fontStream != null) {
-                            fontStream.use { stream ->
-                                PDType0Font.load(document, stream)
-                            }
-                        } else {
-                            PDType1Font(Standard14Fonts.FontName.HELVETICA)
-                        }
+                        val fontStream = this::class.java
+                            .getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")
+                        fontStream?.use { PDType0Font.load(document, it) }
+                            ?: PDType1Font(Standard14Fonts.FontName.HELVETICA)
                     }
                 }
             } catch (e: Exception) {
@@ -497,8 +474,8 @@ class EessiU020PdfGen {
                     else -> PDType1Font(Standard14Fonts.FontName.HELVETICA)
                 }
             }
-        }
     }
+
 
     fun formatDate(dateString: String): String =
         try {
@@ -561,8 +538,10 @@ class EessiU020PdfGen {
                 if (pnr.length == 11) {
                     val birthDate = pnr.substring(0, 6)
                     val centuryMarker = pnr[6]
-                    val validCenturyMarkers = setOf('+', '-', 'Y', 'X', 'W', 'V', 'U', 'T', 'S', 'R', 'Q',
-                        'P', 'N', 'M', 'L', 'K', 'J', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A')
+                    val validCenturyMarkers = setOf(
+                        '+', '-', 'Y', 'X', 'W', 'V', 'U', 'T', 'S', 'R', 'Q',
+                        'P', 'N', 'M', 'L', 'K', 'J', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'
+                    )
 
                     if (birthDate.all { it.isDigit() } && centuryMarker in validCenturyMarkers) {
                         val masked = "*".repeat(4)
