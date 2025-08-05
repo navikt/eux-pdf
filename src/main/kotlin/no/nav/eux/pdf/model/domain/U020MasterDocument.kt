@@ -26,7 +26,7 @@ data class LocalCaseNumber(
     val country: Country,
     val caseNumber: String,
     @JsonProperty("Institution")
-    val institution: Institution
+    val institution: Institution?
 )
 
 data class GeneralInformation(

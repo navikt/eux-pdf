@@ -30,8 +30,8 @@ data class U020Master(
 data class LocalCaseInfo(
     val country: String,
     val caseNumber: String,
-    val institutionID: String,
-    val institutionName: String
+    val institutionID: String?,
+    val institutionName: String?
 )
 
 data class U020Child(
@@ -279,8 +279,8 @@ class EessiU020PdfGen {
                     writeSectionHeader("Lokale saksnummer")
                     cases.forEach { case ->
                         writeSubsectionHeader("${case.country} - ${case.caseNumber}")
-                        writeKeyValuePair("Institusjon", case.institutionName, 30f)
-                        writeKeyValuePair("Institusjon-ID", case.institutionID, 30f)
+                        writeKeyValuePair("Institusjon", case.institutionName ?: "", 30f)
+                        writeKeyValuePair("Institusjon-ID", case.institutionID ?: "", 30f)
                         addSmallSpace()
                     }
                 }

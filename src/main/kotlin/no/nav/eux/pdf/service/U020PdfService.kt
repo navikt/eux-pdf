@@ -40,8 +40,8 @@ class U020PdfService(
             LocalCaseInfo(
                 country = localCase.country.value.firstOrNull() ?: "",
                 caseNumber = localCase.caseNumber,
-                institutionID = localCase.institution.institutionID,
-                institutionName = localCase.institution.institutionName
+                institutionID = localCase.institution?.institutionID,
+                institutionName = localCase.institution?.institutionName
             )
         }
 
