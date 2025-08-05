@@ -10,7 +10,9 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.*
 
 data class U020Master(
     val rinasakId: String,
@@ -159,33 +161,33 @@ class EessiU020PdfGen {
         fun writeDocumentTitle() {
             checkPageSpace(40f)
 
-            contentStream.setLineWidth(2f)
-            contentStream.setStrokingColor(0.3f, 0.3f, 0.3f)
-            contentStream.moveTo(marginLeft, currentY + 5f)
-            contentStream.lineTo(pageWidth - marginRight, currentY + 5f)
-            contentStream.stroke()
-
-            currentY -= 15f
-
             contentStream.beginText()
             contentStream.setFont(boldFont, 18f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText("U020 - Forespørsel om refusjon")
             contentStream.endText()
 
-            currentY -= 25f
+            currentY -= 15f
+
+            contentStream.setLineWidth(2f)
+            contentStream.setStrokingColor(0.7f, 0.7f, 0.7f) // Make line lighter grey
+            contentStream.moveTo(marginLeft, currentY)
+            contentStream.lineTo(pageWidth - marginRight, currentY)
+            contentStream.stroke()
+
+            currentY -= 10f
         }
 
         fun writeGeneratedDate() {
             checkPageSpace()
-            val dateString = "Generert: ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy 'kl.' HH:mm"))}"
+            val dateString = "Generert: ${now().format(ofPattern("dd.MM.yyyy 'kl.' HH:mm"))}"
             contentStream.beginText()
             contentStream.setFont(italicFont, 8f)
             contentStream.setNonStrokingColor(0.5f, 0.5f, 0.5f)
             contentStream.newLineAtOffset(marginLeft, currentY)
             contentStream.showText(dateString)
             contentStream.endText()
-            contentStream.setNonStrokingColor(0f, 0f, 0f) // Reset to black
+            contentStream.setNonStrokingColor(0f, 0f, 0f)
             currentY -= lineHeight
         }
 
@@ -196,7 +198,7 @@ class EessiU020PdfGen {
             contentStream.beginText()
             contentStream.setFont(boldFont, 12f)
             contentStream.newLineAtOffset(marginLeft, currentY)
-            contentStream.showText(title.uppercase())
+            contentStream.showText(title)
             contentStream.endText()
             currentY -= 25f
         }
@@ -315,9 +317,12 @@ class EessiU020PdfGen {
                     pageNumber++
                 }
 
+                if (index > 0) {
+                    addBlankLine()
+                }
+
                 writeSubsectionHeader("Krav ${index + 1}")
 
-                // Person identification numbers - compact format at top
                 claim.personalIdentificationNumbers?.let { pins ->
                     if (pins.isNotEmpty()) {
                         contentStream.beginText()
@@ -342,27 +347,23 @@ class EessiU020PdfGen {
                     }
                 }
 
-                val leftColumnX = marginLeft + 30f
-                val rightColumnX = marginLeft + 280f
+                val columnX = marginLeft + 30f
 
-                // Left column
-                val savedY = currentY
-                writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", leftColumnX)
+                // Single column layout
+                writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
                 currentY -= 12f
 
-                writeCompactKeyValuePair("Etternavn ved fødsel", claim.familyNameAtBirth ?: "-", leftColumnX)
+                writeCompactKeyValuePair("Etternavn ved fødsel", claim.familyNameAtBirth ?: "-", columnX)
                 currentY -= 12f
-                writeCompactKeyValuePair("Fornavn ved fødsel", claim.forenameAtBirth ?: "-", leftColumnX)
-                currentY -= 12f
-
-                // Right column
-                currentY = savedY
-                writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), rightColumnX)
-                currentY -= 12f
-                writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), rightColumnX)
+                writeCompactKeyValuePair("Fornavn ved fødsel", claim.forenameAtBirth ?: "-", columnX)
                 currentY -= 12f
 
-                writeCompactKeyValuePair("Nasjonalitet", claim.nationality ?: "-", rightColumnX)
+                writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), columnX)
+                currentY -= 12f
+                writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), columnX)
+                currentY -= 12f
+
+                writeCompactKeyValuePair("Nasjonalitet", claim.nationality ?: "-", columnX)
                 currentY -= 12f
 
                 val placeText = claim.placeBirth?.let { place ->
@@ -371,46 +372,35 @@ class EessiU020PdfGen {
                         .joinToString(", ")
                         .takeIf { it.isNotBlank() }
                 } ?: "-"
-                writeCompactKeyValuePair("Fødselssted", placeText, rightColumnX)
+                writeCompactKeyValuePair("Fødselssted", placeText, columnX)
                 currentY -= 12f
 
-                currentY = minOf(currentY, savedY - 48f)
-
-                contentStream.setLineWidth(0.5f)
-                contentStream.setStrokingColor(0.8f, 0.8f, 0.8f)
-                contentStream.moveTo(leftColumnX, currentY)
-                contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
-                contentStream.stroke()
+                writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, columnX)
                 currentY -= 12f
-
-                contentStream.beginText()
-                contentStream.setFont(boldFont, 8f)
-                contentStream.newLineAtOffset(leftColumnX, currentY)
-                contentStream.showText("KRAVDETALJER")
-                contentStream.endText()
-                currentY -= 15f
-
-                writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, leftColumnX)
-                writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", rightColumnX)
+                writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", columnX)
                 currentY -= 12f
 
                 writeCompactKeyValuePair("Arbeidsperiode",
-                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", leftColumnX)
-                writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), rightColumnX)
+                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", columnX)
+                currentY -= 12f
+                writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), columnX)
                 currentY -= 12f
 
                 writeCompactKeyValuePair("Refusjonsperiode",
-                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}", leftColumnX)
-                writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", rightColumnX)
+                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}", columnX)
+                currentY -= 12f
+                writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", columnX)
                 currentY -= 15f
 
                 if (index < claims.size - 1) {
+                    // Draw line closer to next heading
                     contentStream.setLineWidth(0.5f)
                     contentStream.setStrokingColor(0.9f, 0.9f, 0.9f)
                     contentStream.moveTo(marginLeft + 20f, currentY)
                     contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
                     contentStream.stroke()
-                    addBlankLine()
+
+                    currentY -= 8f  // Small space after line before next heading
                 }
             }
 
@@ -433,7 +423,7 @@ class EessiU020PdfGen {
     fun formatDate(dateString: String): String =
         try {
             val date = LocalDate.parse(dateString)
-            date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+            date.format(ofPattern("dd.MM.yyyy"))
         } catch (e: Exception) {
             dateString
         }
