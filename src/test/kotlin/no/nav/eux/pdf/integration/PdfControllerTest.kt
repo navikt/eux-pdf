@@ -3,84 +3,265 @@ package no.nav.eux.pdf.integration
 import no.nav.eux.pdf.integration.common.voidHttpEntity
 import no.nav.eux.pdf.integration.config.TestConfig
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Import(TestConfig::class)
-class PdfControllerTest: AbstractPdfApiImplTest() {
+@DisplayName("U020 PDF Generation Integration Tests")
+class PdfControllerTest : AbstractPdfApiImplTest() {
 
-    @Test
-    fun `should call U020 PDF endpoint and return PDF`() {
-        // Given
-        val caseId = 123456
-        val documentId = "f0293bae3c494391851a76d0f6f82f46"
 
-        // Debug: Clear any previous request bodies and log configuration
+    @BeforeEach
+    fun setUp() {
         requestBodies.clear()
-        println("🔧 Mock server should be running on: http://localhost:9500")
-        println("🔧 Test will call: /api/v1/rinasak/$caseId/document/u020/$documentId")
+    }
 
-        // When - call the PDF generation endpoint
-        val response = try {
-            restTemplate.exchange(
-                "/api/v1/rinasak/$caseId/document/u020/$documentId",
-                HttpMethod.GET,
-                voidHttpEntity(mockOAuth2Server),
-                ByteArray::class.java
+    @Nested
+    @DisplayName("Successful PDF Generation")
+    inner class SuccessfulPdfGeneration {
+
+        @Test
+        @DisplayName("Should generate complete U020 PDF with all document components")
+        fun shouldGenerateCompleteU020Pdf() {
+            // Given
+            logTestInfo("Testing complete U020 PDF generation")
+
+            // When
+            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+
+            // Then
+            assertSuccessfulPdfResponse(response)
+
+            val pdfBytes = response.body!!
+            savePdfForInspection(pdfBytes, "complete-u020")
+
+            verifyAllRinaEndpointsWereCalled()
+            verifyExpectedSubdocumentsCalled()
+
+            logTestSuccess("Successfully generated complete U020 PDF", pdfBytes.size)
+        }
+
+        @Test
+        @DisplayName("Should handle multiple individual claims correctly")
+        fun shouldHandleMultipleIndividualClaims() {
+            // Given
+            logTestInfo("Testing PDF generation with multiple individual claims")
+
+            // When
+            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+
+            // Then
+            assertSuccessfulPdfResponse(response)
+
+            val pdfBytes = response.body!!
+            savePdfForInspection(pdfBytes, "multiple-claims")
+
+            assertTrue(
+                pdfBytes.size > 3000,
+                "PDF with 3 individual claims should be substantial, was ${pdfBytes.size} bytes"
             )
-        } catch (e: Exception) {
-            println("❌ Exception occurred: ${e.message}")
-            println("📋 Request bodies captured by mock server:")
-            requestBodies.forEach { (path, body) ->
-                println("  - $path: ${body.take(100)}${if (body.length > 100) "..." else ""}")
-            }
-            throw e
+
+            verifyAllSubdocumentsProcessed()
+            logTestSuccess("Successfully handled multiple individual claims", pdfBytes.size)
+        }
+    }
+
+    @Nested
+    @DisplayName("Error Handling")
+    inner class ErrorHandling {
+
+        @Test
+        @DisplayName("Should return 404 when case is not found")
+        fun shouldReturn404WhenCaseNotFound() {
+            // Given
+            logTestInfo("Testing 404 response for non-existent case")
+
+            // When
+            val response = callPdfEndpointExpectingError(NON_EXISTENT_CASE_ID, VALID_DOCUMENT_ID)
+
+            // Then
+            assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+            logTestSuccess("Correctly returned 404 for non-existent case")
         }
 
-        // Then - verify we get a successful PDF response
-        println("✅ Response status: ${response.statusCode}")
-        println("📊 Response headers: ${response.headers}")
-        println("📄 Response body size: ${response.body?.size ?: 0} bytes")
+        @Test
+        @DisplayName("Should return 404 when document is not found")
+        fun shouldReturn404WhenDocumentNotFound() {
+            // Given
+            logTestInfo("Testing 404 response for non-existent document")
 
-        // Debug: Show what requests were captured
-        println("📋 Requests captured by mock server:")
-        requestBodies.forEach { (path, body) ->
-            println("  - $path: ${body.take(100)}${if (body.length > 100) "..." else ""}")
+            // When
+            val response = callPdfEndpointExpectingError(VALID_CASE_ID, NON_EXISTENT_DOCUMENT_ID)
+
+            // Then
+            assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+            logTestSuccess("Correctly returned 404 for non-existent document")
         }
 
-        // Verify successful response
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(MediaType.APPLICATION_PDF, response.headers.contentType)
+        @Test
+        @DisplayName("Should return 401 when no authentication token provided")
+        fun shouldReturn401WhenNotAuthenticated() {
+            // Given
+            logTestInfo("Testing 401 response for unauthenticated request")
 
-        // Verify PDF content
-        val pdfBytes = response.body
-        assertNotNull(pdfBytes)
-        assertTrue(pdfBytes.size > 1000, "PDF should have substantial content, was ${pdfBytes.size} bytes")
+            // When
+            val response = restTemplate.exchange(
+                "/api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID",
+                HttpMethod.GET,
+                null,
+                String::class.java
+            )
 
-        // Verify PDF header (PDF files start with %PDF-)
-        val pdfHeader = String(pdfBytes.take(4).toByteArray())
-        assertEquals("%PDF", pdfHeader)
+            // Then
+            assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
+            logTestSuccess("Correctly returned 401 for unauthenticated request")
+        }
+    }
 
-        // Verify content disposition header for download
-        val contentDisposition = response.headers.contentDisposition
-        assertNotNull(contentDisposition)
-        assertEquals("attachment", contentDisposition.type)
-        assertEquals("U020-reimbursement-request.pdf", contentDisposition.filename)
+    @Nested
+    @DisplayName("Response Validation")
+    inner class ResponseValidation {
 
-        // Save the PDF to target/ directory for inspection
-        val targetDir = java.io.File("target")
+        @Test
+        @DisplayName("Should return correct HTTP headers for PDF download")
+        fun shouldReturnCorrectHttpHeaders() {
+            // Given
+            logTestInfo("Testing PDF response headers")
+
+            // When
+            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+
+            // Then
+            assertSuccessfulPdfResponse(response)
+
+            val contentDisposition = response.headers.contentDisposition
+            assertNotNull(contentDisposition, "Content-Disposition header should be present")
+            assertEquals("attachment", contentDisposition.type, "Should be attachment type")
+            assertEquals(EXPECTED_FILENAME, contentDisposition.filename, "Should have correct filename")
+
+            logTestSuccess("All HTTP headers are correct")
+        }
+
+        @Test
+        @DisplayName("Should generate valid PDF format")
+        fun shouldGenerateValidPdfFormat() {
+            // Given
+            logTestInfo("Testing PDF format validation")
+
+            // When
+            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+
+            // Then
+            assertSuccessfulPdfResponse(response)
+
+            val pdfBytes = response.body!!
+
+            val pdfHeader = String(pdfBytes.take(4).toByteArray())
+            assertEquals(PDF_MAGIC_BYTES, pdfHeader, "PDF should start with correct magic bytes")
+
+            assertTrue(
+                pdfBytes.size > MIN_PDF_SIZE,
+                "PDF should have substantial content, was ${pdfBytes.size} bytes"
+            )
+
+            savePdfForInspection(pdfBytes, "format-validation")
+            logTestSuccess("PDF format is valid", pdfBytes.size)
+        }
+    }
+
+    private fun callPdfEndpoint(caseId: Int, documentId: String) =
+        restTemplate.exchange(
+            "/api/v1/rinasak/$caseId/document/u020/$documentId",
+            HttpMethod.GET,
+            voidHttpEntity(mockOAuth2Server),
+            ByteArray::class.java
+        )
+
+    private fun callPdfEndpointExpectingError(caseId: Int, documentId: String) =
+        restTemplate.exchange(
+            "/api/v1/rinasak/$caseId/document/u020/$documentId",
+            HttpMethod.GET,
+            voidHttpEntity(mockOAuth2Server),
+            String::class.java
+        )
+
+    private fun assertSuccessfulPdfResponse(response: org.springframework.http.ResponseEntity<ByteArray>) {
+        assertEquals(HttpStatus.OK, response.statusCode, "Should return HTTP 200")
+        assertEquals(MediaType.APPLICATION_PDF, response.headers.contentType, "Should return PDF content type")
+        assertNotNull(response.body, "Response body should not be null")
+    }
+
+    private fun verifyAllRinaEndpointsWereCalled() {
+        assertTrue(
+            requestBodies.keys.any {
+                it.contains("/eessiRest/Cases/$VALID_CASE_ID/Documents/$VALID_DOCUMENT_ID") && !it.contains(
+                    "/Subdocuments"
+                )
+            },
+            "Master document endpoint should have been called"
+        )
+
+        assertTrue(
+            requestBodies.keys.any {
+                it.contains("/eessiRest/Cases/$VALID_CASE_ID/Documents/$VALID_DOCUMENT_ID/Subdocuments") && !it.contains(
+                    "subdoc_"
+                )
+            },
+            "Subdocuments collection endpoint should have been called"
+        )
+    }
+
+    private fun verifyExpectedSubdocumentsCalled() {
+        val expectedSubdocuments = listOf("subdoc_001", "subdoc_002", "subdoc_003")
+        expectedSubdocuments.forEach { subdocId ->
+            assertTrue(
+                requestBodies.keys.any { it.contains("/Subdocuments/$subdocId") },
+                "Subdocument endpoint for $subdocId should have been called"
+            )
+        }
+    }
+
+    private fun verifyAllSubdocumentsProcessed() {
+        val subdocumentCalls = requestBodies.keys.filter { it.contains("/Subdocuments/subdoc_") }
+        assertTrue(
+            subdocumentCalls.size >= 3,
+            "All 3 subdocuments should have been processed, " +
+                    "found calls: ${subdocumentCalls.size}. Calls: $subdocumentCalls"
+        )
+    }
+
+    private fun savePdfForInspection(pdfBytes: ByteArray, testName: String) {
+        val targetDir = File("target")
         if (!targetDir.exists()) {
             targetDir.mkdirs()
         }
-        val pdfFile = java.io.File(targetDir, "U020-IT-generated-${System.currentTimeMillis()}.pdf")
+
+        val timestamp = System.currentTimeMillis()
+        val fileName = "U020-IT-$testName-$timestamp.pdf"
+        val pdfFile = File(targetDir, fileName)
+
         pdfFile.writeBytes(pdfBytes)
         println("💾 PDF saved to: ${pdfFile.absolutePath}")
+    }
 
-        println("✅ Successfully generated PDF with ${pdfBytes.size} bytes")
+    private fun logTestInfo(message: String) {
+        println("🧪 $message")
+        println("📍 Mock server: http://localhost:9500")
+        println("📍 Endpoint: /api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID")
+    }
+
+    private fun logTestSuccess(message: String, pdfSize: Int? = null) {
+        val sizeInfo = pdfSize?.let { " (${it} bytes)" } ?: ""
+        println("✅ $message$sizeInfo")
+        println("📊 Mock requests captured: ${requestBodies.size}")
     }
 }

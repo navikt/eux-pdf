@@ -50,25 +50,36 @@ class MockWebServerConfiguration(
 
             request.path?.matches(Regex(".*/eessiRest/Cases/123456$")) == true -> rinaCaseResponse()
 
-            request.path?.matches(Regex(".*/eessiRest/Cases/\\d+/Documents/[^/]+$")) == true ->
+            request.path?.matches(Regex(".*/eessiRest/Cases/999999.*")) == true ->
+                MockResponse().apply {
+                    setResponseCode(404)
+                    setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    setBody("""{"error": "Case not found"}""")
+                }
+
+            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46") == true &&
+            request.path?.contains("/Subdocuments") == false ->
                 masterDocumentResponse()
 
-            request.path?.matches(Regex(".*/eessiRest/Cases/\\d+/Documents/[^/]+/Subdocuments$")) == true ->
+            request.path?.contains("/eessiRest/Cases/123456/Documents/non-existent-document-id") == true &&
+            request.path?.contains("/Subdocuments") == false ->
+                MockResponse().apply {
+                    setResponseCode(404)
+                    setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    setBody("""{"error": "Document not found"}""")
+                }
+
+            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments") == true &&
+            request.path?.contains("subdoc_") == false ->
                 subdocumentsCollectionResponse()
 
-            request.path?.contains("/eessiRest/Cases/") == true &&
-            request.path?.contains("/Documents/") == true &&
-            request.path?.contains("/Subdocuments/subdoc_001") == true ->
+            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_001") == true ->
                 childDocumentResponse("u020-child-document-001.json")
 
-            request.path?.contains("/eessiRest/Cases/") == true &&
-            request.path?.contains("/Documents/") == true &&
-            request.path?.contains("/Subdocuments/subdoc_002") == true ->
+            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_002") == true ->
                 childDocumentResponse("u020-child-document-002.json")
 
-            request.path?.contains("/eessiRest/Cases/") == true &&
-            request.path?.contains("/Documents/") == true &&
-            request.path?.contains("/Subdocuments/subdoc_003") == true ->
+            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_003") == true ->
                 childDocumentResponse("u020-child-document-003.json")
 
             else -> defaultResponse()
@@ -130,19 +141,6 @@ class MockWebServerConfiguration(
             setBody("""{"error": "Mock endpoint not found"}""")
         }
 
-    fun formParameters(formUrlEncodedString: String) =
-        formUrlEncodedString.split("&")
-            .filter { it.isNotEmpty() }
-            .map { decode(it).split("=", limit = 2) }
-            .associate { it[0] to it.getOrElse(1) { "" } }
-
-    fun tokenResponse(formParams: Map<String, String>) =
-        MockResponse().apply {
-            setResponseCode(200)
-            setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            setBody(tokenResponse)
-        }
-
     val tokenResponse = """{
           "token_type": "Bearer",
           "scope": "test",
@@ -165,8 +163,6 @@ class MockWebServerConfiguration(
     fun shutdown() {
         server.shutdown()
     }
-
-    fun decode(value: String): String = decode(value, UTF_8)
 
     private fun dispatcher() = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {
