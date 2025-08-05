@@ -37,6 +37,11 @@
               }
             }
           }
+        },
+        "AdditionalInformationPerson": {
+          "nationality": {
+            "value": ["NO"]
+          }
         }
       },
       "reimbursementRequestID": "REQ-2024-001234",

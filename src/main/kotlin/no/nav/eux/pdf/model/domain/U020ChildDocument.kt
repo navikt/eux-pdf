@@ -30,7 +30,9 @@ data class IndividualClaim(
 
 data class Person(
     @JsonProperty("PersonIdentification")
-    val personIdentification: PersonIdentification
+    val personIdentification: PersonIdentification,
+    @JsonProperty("AdditionalInformationPerson")
+    val additionalInformationPerson: AdditionalInformationPerson? = null
 )
 
 data class PersonIdentification(
@@ -106,4 +108,8 @@ data class PlaceBirth(
     val town: String? = null,
     val region: String? = null,
     val country: Country? = null
+)
+
+data class AdditionalInformationPerson(
+    val nationality: Country? = null
 )

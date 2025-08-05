@@ -17,17 +17,11 @@ class U020PdfService(
         documentId: String
     ): ByteArray {
         val masterDocument = rinaClient.getDocument(caseId, documentId)
-        rinaClient
-            .getDocumentStringTest(caseId, documentId)
-            .also { println(it) }
         val masterDocumentContent = masterDocument.u020Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U020 master ikke funnet")
         val subdocumentsCollection = rinaClient.getSubdocuments(caseId, documentId)
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
-                rinaClient
-                    .getSubdocumentStringTest(caseId, documentId, subdocument.id)
-                    .also { println(it) }
                 rinaClient.getSubdocument(caseId, documentId, subdocument.id)
             }
         }
@@ -71,6 +65,7 @@ class U020PdfService(
         val child = childDoc.u020Child
         val claim = child.individualClaim
         val person = claim.person.personIdentification
+        val fullPerson = claim.person
         val institution = claim.institutionWhichCertifiedInsuranceRecord.theInstitutionExistsInIr
         val workingPeriods = claim.workingPeriodsConsidered.workingPeriodConsidered
         val reimbursementPeriod = claim.reimbursementPeriod
@@ -95,7 +90,7 @@ class U020PdfService(
             )
         }
 
-        val nationality = null
+        val nationality = fullPerson.additionalInformationPerson?.nationality?.value?.firstOrNull()
 
         return U020Child(
             familyName = person.familyName,
