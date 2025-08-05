@@ -25,6 +25,32 @@
                   "institutionID": "NO:NAVT003",
                   "institutionName": "NAV Trygd"
                 }
+              },
+              {
+                "country": {
+                  "value": ["FI"]
+                },
+                "personalIdentificationNumber": "221178-123A",
+                "sector": {
+                  "value": ["ALL"]
+                },
+                "Institution": {
+                  "institutionID": "FI:KELA001",
+                  "institutionName": "Kansaneläkelaitos (KELA)"
+                }
+              },
+              {
+                "country": {
+                  "value": ["SE"]
+                },
+                "personalIdentificationNumber": "19781122-1234",
+                "sector": {
+                  "value": ["ALL"]
+                },
+                "Institution": {
+                  "institutionID": "SE:FORSAKR",
+                  "institutionName": "Försäkringskassan"
+                }
               }
             ]
           },
@@ -73,4 +99,3 @@
     }
   }
 }
-
