@@ -9,10 +9,8 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalDateTime.now
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatter.*
+import java.time.format.DateTimeFormatter.ofPattern
 
 data class U020Master(
     val rinasakId: String,
@@ -169,8 +167,8 @@ class EessiU020PdfGen {
 
             currentY -= 15f
 
-            contentStream.setLineWidth(2f)
-            contentStream.setStrokingColor(0.7f, 0.7f, 0.7f) // Make line lighter grey
+            contentStream.setLineWidth(1f)
+            contentStream.setStrokingColor(0.7f, 0.7f, 0.7f)
             contentStream.moveTo(marginLeft, currentY)
             contentStream.lineTo(pageWidth - marginRight, currentY)
             contentStream.stroke()
@@ -317,9 +315,8 @@ class EessiU020PdfGen {
                     pageNumber++
                 }
 
-                if (index > 0) {
+                if (index > 0)
                     addBlankLine()
-                }
 
                 writeSubsectionHeader("Krav ${index + 1}")
 
@@ -334,11 +331,12 @@ class EessiU020PdfGen {
                         currentY -= 12f
 
                         pins.forEach { pin ->
+                            val maskedPnr = maskNorwegianPnr(pin.personalIdentificationNumber, pin.country)
                             contentStream.beginText()
                             contentStream.setFont(regularFont, 8f)
                             contentStream.setNonStrokingColor(0.3f, 0.3f, 0.3f)
                             contentStream.newLineAtOffset(marginLeft + 45f, currentY)
-                            contentStream.showText("${pin.country}: ${pin.personalIdentificationNumber} (${pin.sector})")
+                            contentStream.showText("${pin.country}: $maskedPnr (${pin.sector})")
                             contentStream.endText()
                             currentY -= 11f
                         }
@@ -349,7 +347,6 @@ class EessiU020PdfGen {
 
                 val columnX = marginLeft + 30f
 
-                // Single column layout
                 writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
                 currentY -= 12f
 
@@ -380,27 +377,31 @@ class EessiU020PdfGen {
                 writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", columnX)
                 currentY -= 12f
 
-                writeCompactKeyValuePair("Arbeidsperiode",
-                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", columnX)
+                writeCompactKeyValuePair(
+                    "Arbeidsperiode",
+                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", columnX
+                )
                 currentY -= 12f
                 writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), columnX)
                 currentY -= 12f
 
-                writeCompactKeyValuePair("Refusjonsperiode",
-                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}", columnX)
+                writeCompactKeyValuePair(
+                    "Refusjonsperiode",
+                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}",
+                    columnX
+                )
                 currentY -= 12f
                 writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", columnX)
                 currentY -= 15f
 
                 if (index < claims.size - 1) {
-                    // Draw line closer to next heading
                     contentStream.setLineWidth(0.5f)
                     contentStream.setStrokingColor(0.9f, 0.9f, 0.9f)
                     contentStream.moveTo(marginLeft + 20f, currentY)
                     contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
                     contentStream.stroke()
 
-                    currentY -= 8f  // Small space after line before next heading
+                    currentY -= 8f
                 }
             }
 
@@ -434,4 +435,55 @@ class EessiU020PdfGen {
             "02" -> "Kvinne"
             else -> "Ukjent ($sexCode)"
         }
+
+    fun maskNorwegianPnr(pnr: String, country: String) =
+        when (country.uppercase()) {
+            "NO" -> {
+                if (pnr.length == 11 && pnr.all { it.isDigit() }) {
+                    val firstSix = pnr.substring(0, 6)
+                    val masked = "*".repeat(5)
+                    "$firstSix$masked"
+                } else {
+                    maskGeneric(pnr)
+                }
+            }
+
+            "DK" -> {
+                val cleanPnr = pnr.replace("-", "")
+                if (cleanPnr.length == 10 && cleanPnr.all { it.isDigit() }) {
+                    val birthDate = cleanPnr.substring(0, 6)
+                    val masked = "*".repeat(4)
+                    "$birthDate-$masked"
+                } else {
+                    maskGeneric(pnr)
+                }
+            }
+
+            "SE" -> {
+                val cleanPnr = pnr.replace("-", "")
+                when {
+                    cleanPnr.length == 12 && cleanPnr.all { it.isDigit() } -> {
+                        val birthDate = cleanPnr.substring(0, 8)
+                        val masked = "*".repeat(4)
+                        "$birthDate-$masked"
+                    }
+
+                    cleanPnr.length == 10 && cleanPnr.all { it.isDigit() } -> {
+                        val birthDate = cleanPnr.substring(0, 6)
+                        val masked = "*".repeat(4)
+                        "$birthDate-$masked"
+                    }
+
+                    else -> maskGeneric(pnr)
+                }
+            }
+
+            else -> maskGeneric(pnr)
+        }
+
+    private fun maskGeneric(pnr: String): String =
+        if (pnr.length > 3)
+            "*".repeat(pnr.length - 3) + pnr.takeLast(3)
+        else
+            pnr
 }
