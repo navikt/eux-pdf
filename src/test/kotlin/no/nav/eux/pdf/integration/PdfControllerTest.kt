@@ -18,8 +18,7 @@ import kotlin.test.assertTrue
 @Import(TestConfig::class)
 @DisplayName("U020 PDF Generation Integration Tests")
 class PdfControllerTest : AbstractPdfApiImplTest() {
-
-
+    
     @BeforeEach
     fun setUp() {
         requestBodies.clear()
@@ -32,13 +31,8 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should generate complete U020 PDF with all document components")
         fun shouldGenerateCompleteU020Pdf() {
-            // Given
             logTestInfo("Testing complete U020 PDF generation")
-
-            // When
             val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
-
-            // Then
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -53,13 +47,8 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should handle multiple individual claims correctly")
         fun shouldHandleMultipleIndividualClaims() {
-            // Given
             logTestInfo("Testing PDF generation with multiple individual claims")
-
-            // When
             val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
-
-            // Then
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -82,13 +71,8 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should return 404 when case is not found")
         fun shouldReturn404WhenCaseNotFound() {
-            // Given
             logTestInfo("Testing 404 response for non-existent case")
-
-            // When
             val response = callPdfEndpointExpectingError(NON_EXISTENT_CASE_ID, VALID_DOCUMENT_ID)
-
-            // Then
             assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
             logTestSuccess("Correctly returned 404 for non-existent case")
         }
@@ -96,13 +80,8 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should return 404 when document is not found")
         fun shouldReturn404WhenDocumentNotFound() {
-            // Given
             logTestInfo("Testing 404 response for non-existent document")
-
-            // When
             val response = callPdfEndpointExpectingError(VALID_CASE_ID, NON_EXISTENT_DOCUMENT_ID)
-
-            // Then
             assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
             logTestSuccess("Correctly returned 404 for non-existent document")
         }
@@ -110,18 +89,13 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should return 401 when no authentication token provided")
         fun shouldReturn401WhenNotAuthenticated() {
-            // Given
             logTestInfo("Testing 401 response for unauthenticated request")
-
-            // When
             val response = restTemplate.exchange(
                 "/api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID",
                 HttpMethod.GET,
                 null,
                 String::class.java
             )
-
-            // Then
             assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
             logTestSuccess("Correctly returned 401 for unauthenticated request")
         }
@@ -134,15 +108,9 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should return correct HTTP headers for PDF download")
         fun shouldReturnCorrectHttpHeaders() {
-            // Given
             logTestInfo("Testing PDF response headers")
-
-            // When
             val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
-
-            // Then
             assertSuccessfulPdfResponse(response)
-
             val contentDisposition = response.headers.contentDisposition
             assertNotNull(contentDisposition, "Content-Disposition header should be present")
             assertEquals("attachment", contentDisposition.type, "Should be attachment type")
@@ -154,13 +122,8 @@ class PdfControllerTest : AbstractPdfApiImplTest() {
         @Test
         @DisplayName("Should generate valid PDF format")
         fun shouldGenerateValidPdfFormat() {
-            // Given
             logTestInfo("Testing PDF format validation")
-
-            // When
             val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
-
-            // Then
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!

@@ -10,11 +10,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpHeaders.SET_COOKIE
-import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import java.net.URLDecoder.decode
-import java.nio.charset.StandardCharsets.UTF_8
-import java.time.Instant
 
 @Configuration
 class MockWebServerConfiguration(
@@ -140,15 +138,6 @@ class MockWebServerConfiguration(
             setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             setBody("""{"error": "Mock endpoint not found"}""")
         }
-
-    val tokenResponse = """{
-          "token_type": "Bearer",
-          "scope": "test",
-          "expires_at": "${Instant.now().plusSeconds(3600).epochSecond}",
-          "ext_expires_in": "30",
-          "expires_in": "30",
-          "access_token": "token"
-        }"""
 
     private fun loadMockFile(fileName: String): String {
         return try {
