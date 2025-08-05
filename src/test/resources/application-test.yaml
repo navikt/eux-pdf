@@ -1,0 +1,28 @@
+no.nav.security.jwt:
+  expirythreshold: 1
+  issuer:
+    azuread:
+      discoveryurl: http://localhost:${mock-oauth2-server.port}/issuer1/.well-known/openid-configuration
+      accepted_audience: demoapplication
+
+no.nav.eux.rina:
+  cpi:
+    rinaBaseUrl: http://localhost:9500
+
+credentials:
+  username: testuser
+  password: testpassword
+
+spring:
+  flyway:
+    clean-disabled: false
+  main:
+    banner-mode: "off"
+  jackson:
+    deserialization:
+      ACCEPT_EMPTY_STRING_AS_NULL_OBJECT: true
+
+logging:
+  level:
+    no.nav.eux.pdf: DEBUG
+    org.springframework.web.client: DEBUG

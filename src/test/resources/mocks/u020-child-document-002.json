@@ -1,0 +1,76 @@
+{
+  "U020_Child": {
+    "IndividualClaim": {
+      "Person": {
+        "PersonIdentification": {
+          "familyName": "Hansen",
+          "forename": "Kari",
+          "dateBirth": "1978-11-22",
+          "sex": {
+            "value": ["F"]
+          },
+          "familyNameAtBirth": "Larsen",
+          "forenameAtBirth": "Kari",
+          "PINPersonInEachInstitution": {
+            "PersonalIdentificationNumber": [
+              {
+                "country": {
+                  "value": ["NO"]
+                },
+                "personalIdentificationNumber": "22117812345",
+                "sector": {
+                  "value": ["ALL"]
+                },
+                "Institution": {
+                  "institutionID": "NO:NAVT003",
+                  "institutionName": "NAV Trygd"
+                }
+              }
+            ]
+          },
+          "IfPINNotProvidedForEveryInstitutionPleaseProvide": {
+            "PlaceBirth": {
+              "town": "Bergen",
+              "region": "Vestland",
+              "country": {
+                "value": ["NO"]
+              }
+            }
+          }
+        }
+      },
+      "reimbursementRequestID": "REQ-2024-001234",
+      "sequentialNumberIndividualClaim": "2",
+      "InstitutionWhichCertifiedInsuranceRecord": {
+        "TheInstitutionEXISTSInIR": {
+          "institutionID": "NO:NAVT003",
+          "institutionName": "NAV Trygd"
+        }
+      },
+      "WorkingPeriodsConsidered": {
+        "WorkingPeriodConsidered": [
+          {
+            "startDate": "2019-06-01",
+            "endDate": "2021-05-31"
+          },
+          {
+            "startDate": "2022-01-01",
+            "endDate": "2023-12-31"
+          }
+        ]
+      },
+      "ReimbursementPeriod": {
+        "startDate": "2023-01-01",
+        "endDate": "2023-12-31"
+      },
+      "lastPaymentDate": "2023-12-20",
+      "RequestedAmountForReimbursement": {
+        "amount": "7899.25",
+        "currency": {
+          "value": ["EUR"]
+        }
+      }
+    }
+  }
+}
+

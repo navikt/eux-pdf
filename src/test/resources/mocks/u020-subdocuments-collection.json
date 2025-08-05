@@ -1,0 +1,191 @@
+{
+  "totalCount": 3,
+  "items": [
+    {
+      "no": "1",
+      "subdocuments": [
+        {
+          "id": "subdoc_001",
+          "mimeType": "application/json",
+          "lastUpdate": "2024-08-01T10:30:00Z",
+          "creationDate": "2024-08-01T09:15:00Z",
+          "creator": {
+            "id": "user_001",
+            "type": "USER",
+            "name": "John Doe",
+            "organisation": {
+              "id": "NO:NAVT003",
+              "registryNumber": "889640782",
+              "name": "NAV Trygd",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "2006-07-01"
+            }
+          },
+          "hasMultipleVersions": false,
+          "versions": [
+            {
+              "id": "v1",
+              "date": "2024-08-01T09:15:00Z",
+              "user": {
+                "id": "user_001",
+                "type": "USER",
+                "name": "John Doe",
+                "organisation": {
+                  "id": "NO:NAVT003",
+                  "registryNumber": "889640782",
+                  "name": "NAV Trygd",
+                  "acronym": "NAV",
+                  "countryCode": "NO",
+                  "activeSince": "2006-07-01"
+                }
+              }
+            }
+          ],
+          "parentDocumentId": "master_doc_001",
+          "type": "U020_CHILD",
+          "attachments": [],
+          "traits": {
+            "fam": "Nordmann",
+            "for": "Ola",
+            "cid": "claim_001"
+          },
+          "validation": {
+            "status": "VALID"
+          }
+        }
+      ],
+      "id": "item_001"
+    },
+    {
+      "no": "2",
+      "subdocuments": [
+        {
+          "id": "subdoc_002",
+          "mimeType": "application/json",
+          "lastUpdate": "2024-08-01T11:45:00Z",
+          "creationDate": "2024-08-01T10:30:00Z",
+          "creator": {
+            "id": "user_002",
+            "type": "USER",
+            "name": "Jane Smith",
+            "organisation": {
+              "id": "NO:NAVT003",
+              "registryNumber": "889640782",
+              "name": "NAV Trygd",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "2006-07-01"
+            }
+          },
+          "hasMultipleVersions": true,
+          "versions": [
+            {
+              "id": "v1",
+              "date": "2024-08-01T10:30:00Z",
+              "user": {
+                "id": "user_002",
+                "type": "USER",
+                "name": "Jane Smith",
+                "organisation": {
+                  "id": "NO:NAVT003",
+                  "registryNumber": "889640782",
+                  "name": "NAV Trygd",
+                  "acronym": "NAV",
+                  "countryCode": "NO",
+                  "activeSince": "2006-07-01"
+                }
+              }
+            },
+            {
+              "id": "v2",
+              "date": "2024-08-01T11:45:00Z",
+              "user": {
+                "id": "user_002",
+                "type": "USER",
+                "name": "Jane Smith",
+                "organisation": {
+                  "id": "NO:NAVT003",
+                  "registryNumber": "889640782",
+                  "name": "NAV Trygd",
+                  "acronym": "NAV",
+                  "countryCode": "NO",
+                  "activeSince": "2006-07-01"
+                }
+              }
+            }
+          ],
+          "parentDocumentId": "master_doc_001",
+          "type": "U020_CHILD",
+          "attachments": [],
+          "traits": {
+            "fam": "Hansen",
+            "for": "Kari",
+            "cid": "claim_002"
+          },
+          "validation": {
+            "status": "VALID"
+          }
+        }
+      ],
+      "id": "item_002"
+    },
+    {
+      "no": "3",
+      "subdocuments": [
+        {
+          "id": "subdoc_003",
+          "mimeType": "application/json",
+          "lastUpdate": "2024-08-01T14:20:00Z",
+          "creationDate": "2024-08-01T13:45:00Z",
+          "creator": {
+            "id": "user_001",
+            "type": "USER",
+            "name": "John Doe",
+            "organisation": {
+              "id": "NO:NAVT003",
+              "registryNumber": "889640782",
+              "name": "NAV Trygd",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "2006-07-01"
+            }
+          },
+          "hasMultipleVersions": false,
+          "versions": [
+            {
+              "id": "v1",
+              "date": "2024-08-01T13:45:00Z",
+              "user": {
+                "id": "user_001",
+                "type": "USER",
+                "name": "John Doe",
+                "organisation": {
+                  "id": "NO:NAVT003",
+                  "registryNumber": "889640782",
+                  "name": "NAV Trygd",
+                  "acronym": "NAV",
+                  "countryCode": "NO",
+                  "activeSince": "2006-07-01"
+                }
+              }
+            }
+          ],
+          "parentDocumentId": "master_doc_001",
+          "type": "U020_CHILD",
+          "attachments": [],
+          "traits": {
+            "fam": "Olsen",
+            "for": "Erik",
+            "cid": "claim_003"
+          },
+          "validation": {
+            "status": "PENDING"
+          }
+        }
+      ],
+      "id": "item_003"
+    }
+  ]
+}
+

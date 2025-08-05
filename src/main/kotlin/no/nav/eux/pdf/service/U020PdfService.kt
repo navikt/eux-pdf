@@ -77,7 +77,6 @@ class U020PdfService(
         val requestedAmount = claim.requestedAmountForReimbursement
         val workingPeriod = workingPeriods.firstOrNull()
 
-        // Map personal identification numbers
         val personalIdNumbers = person.pinPersonInEachInstitution?.personalIdentificationNumber?.map { pin ->
             PersonIdInfo(
                 country = pin.country.value.firstOrNull() ?: "",
@@ -88,7 +87,6 @@ class U020PdfService(
             )
         }
 
-        // Map place of birth
         val placeBirth = person.ifPinNotProvidedForEveryInstitutionPleaseProvide?.placeBirth?.let { place ->
             PlaceBirthInfo(
                 town = place.town,
@@ -97,8 +95,7 @@ class U020PdfService(
             )
         }
 
-        // Extract nationality (assuming it's in additional person information if available)
-        val nationality = null // This would need to be mapped from AdditionalInformationPerson if available
+        val nationality = null
 
         return U020Child(
             familyName = person.familyName,

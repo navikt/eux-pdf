@@ -1,0 +1,57 @@
+{
+  "id": 123456,
+  "subject": {
+    "name": "Ola",
+    "surname": "Nordmann",
+    "sex": "M",
+    "birthday": "1985-03-15"
+  },
+  "actions": [
+    {
+      "id": "action_001",
+      "name": "Create U020",
+      "template": "U020_template",
+      "operation": "CREATE",
+      "documentType": "U020"
+    },
+    {
+      "id": "action_002",
+      "name": "Send Document",
+      "template": "SEND_template",
+      "operation": "SEND",
+      "documentType": "U020"
+    }
+  ],
+  "processDefinitionName": "ReimbursementRequest",
+  "documents": [
+    {
+      "status": "ACTIVE",
+      "type": "U020"
+    },
+    {
+      "status": "DRAFT",
+      "type": "U020"
+    }
+  ],
+  "participants": [
+    {
+      "role": "SOURCE_INSTITUTION",
+      "organisation": {
+        "id": "NO:NAVT003",
+        "name": "NAV Trygd",
+        "countryCode": "NO"
+      },
+      "selected": true
+    },
+    {
+      "role": "DESTINATION_INSTITUTION",
+      "organisation": {
+        "id": "DE:GKV001",
+        "name": "Deutsche Gesetzliche Krankenversicherung",
+        "countryCode": "DE"
+      },
+      "selected": false
+    }
+  ]
+}
+

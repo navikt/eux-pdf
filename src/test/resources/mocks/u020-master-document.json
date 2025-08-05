@@ -1,0 +1,49 @@
+{
+  "U020_Master": {
+    "sedGVer": "4.2",
+    "sedPackage": "P_BUC_01",
+    "sedVer": "4.2",
+    "LocalCaseNumbers": {
+      "LocalCaseNumber": [
+        {
+          "country": {
+            "value": ["NO"]
+          },
+          "caseNumber": "NAV-2024-001234",
+          "Institution": {
+            "institutionID": "NO:NAVT003",
+            "institutionName": "NAV Trygd"
+          }
+        },
+        {
+          "country": {
+            "value": ["DE"]
+          },
+          "caseNumber": "GKV-2024-005678",
+          "Institution": {
+            "institutionID": "DE:GKV001",
+            "institutionName": "Deutsche Gesetzliche Krankenversicherung"
+          }
+        }
+      ]
+    },
+    "GeneralInformation": {
+      "reimbursementRequestID": "REQ-2024-001234",
+      "numberIndividualClaims": "3",
+      "TotalAmountRequested": {
+        "amount": "15750.50",
+        "currency": {
+          "value": ["EUR"]
+        }
+      },
+      "BankInformation": {
+        "SEPABankDetails": {
+          "IBAN": "NO9386011117947",
+          "BICSWIFT": "DNBANOKK"
+        },
+        "bankTransferSubjectOrTransactionReference": "U020-REF-2024-001234"
+      }
+    }
+  }
+}
+
