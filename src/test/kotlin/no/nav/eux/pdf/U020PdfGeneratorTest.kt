@@ -1,11 +1,6 @@
 package no.nav.eux.pdf
 
-import no.nav.eux.pdf.service.EessiU020PdfGen
-import no.nav.eux.pdf.service.LocalCaseInfo
-import no.nav.eux.pdf.service.PersonIdInfo
-import no.nav.eux.pdf.service.PlaceBirthInfo
-import no.nav.eux.pdf.service.U020Child
-import no.nav.eux.pdf.service.U020Master
+import no.nav.eux.pdf.service.*
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -43,34 +38,27 @@ class U020PdfGeneratorTest {
         )
         val claims = listOf(
             U020Child(
-                familyName = "Hansen",
-                forename = "Kari",
+                familyName = "Januškevičius",
+                forename = "Petras",
                 dateBirth = "2011-06-01",
                 sex = "01",
-                familyNameAtBirth = "Andersen",
-                forenameAtBirth = "Kari Marie",
+                familyNameAtBirth = "Žemaitis",
+                forenameAtBirth = "Petras Antanas",
                 personalIdentificationNumbers = listOf(
                     PersonIdInfo(
-                        country = "NO",
-                        personalIdentificationNumber = "12345678901",
+                        country = "LT",
+                        personalIdentificationNumber = "39906012345",
                         sector = "03",
-                        institutionID = "NO:NAVAT07",
-                        institutionName = "NAV ACC 07"
-                    ),
-                    PersonIdInfo(
-                        country = "SE",
-                        personalIdentificationNumber = "19900101-1234",
-                        sector = "01",
-                        institutionID = "SE:FA001",
-                        institutionName = "Försäkringskassan"
+                        institutionID = "LT:SODRA001",
+                        institutionName = "Valstybinio socialinio draudimo fondo valdyba"
                     )
                 ),
                 placeBirth = PlaceBirthInfo(
-                    town = "Oslo",
-                    region = "Oslo",
-                    country = "NO"
+                    town = "Vilnius",
+                    region = "Vilniaus apskritis",
+                    country = "LT"
                 ),
-                nationality = "NO",
+                nationality = "LT",
                 reimbursementRequestID = "111111",
                 sequentialNumber = "1",
                 institutionID = "NO:NAVAT07",
@@ -84,11 +72,11 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Johansen",
-                forename = "Erik",
+                familyName = "Åström",
+                forename = "Erik Göran",
                 dateBirth = "1985-03-15",
                 sex = "01",
-                familyNameAtBirth = "Eriksen",
+                familyNameAtBirth = "Eriksson",
                 forenameAtBirth = "Erik Johan",
                 personalIdentificationNumbers = listOf(
                     PersonIdInfo(
@@ -100,8 +88,8 @@ class U020PdfGeneratorTest {
                     )
                 ),
                 placeBirth = PlaceBirthInfo(
-                    town = "Stockholm",
-                    region = "Stockholm",
+                    town = "Göteborg",
+                    region = "Västra Götalands län",
                     country = "SE"
                 ),
                 nationality = "SE",
@@ -118,10 +106,12 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Andersen",
-                forename = "Ingrid",
+                familyName = "Jørgensen",
+                forename = "Åse",
                 dateBirth = "1985-03-15",
                 sex = "02",
+                familyNameAtBirth = "Lærdal",
+                forenameAtBirth = "Åse Margrethe",
                 personalIdentificationNumbers = listOf(
                     PersonIdInfo(
                         country = "DK",
@@ -150,33 +140,27 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Olsen",
-                forename = "Magnus",
+                familyName = "Müller",
+                forename = "Jürgen",
                 dateBirth = "1992-07-22",
                 sex = "01",
-                familyNameAtBirth = "Magnusson",
+                familyNameAtBirth = "Weiß",
+                forenameAtBirth = "Jürgen François",
                 personalIdentificationNumbers = listOf(
                     PersonIdInfo(
-                        country = "FI",
-                        personalIdentificationNumber = "220792A123B",
-                        sector = "04",
-                        institutionID = "FI:KELA001",
-                        institutionName = "Kela"
-                    ),
-                    PersonIdInfo(
-                        country = "NO",
+                        country = "DE",
                         personalIdentificationNumber = "22079298765",
                         sector = "03",
-                        institutionID = "NO:NAVAT09",
-                        institutionName = "NAV ACC 09"
+                        institutionID = "DE:GKV001",
+                        institutionName = "Deutsche Gesetzliche Krankenversicherung"
                     )
                 ),
                 placeBirth = PlaceBirthInfo(
-                    town = "Helsinki",
-                    region = "Uusimaa",
-                    country = "FI"
+                    town = "München",
+                    region = "Bayern",
+                    country = "DE"
                 ),
-                nationality = "FI",
+                nationality = "DE",
                 reimbursementRequestID = "111111",
                 sequentialNumber = "4",
                 institutionID = "NO:NAVAT08",
@@ -190,20 +174,37 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             ),
             U020Child(
-                familyName = "Larsen",
-                forename = "Astrid",
+                familyName = "Čechová",
+                forename = "Božena",
                 dateBirth = "1978-12-03",
                 sex = "02",
+                familyNameAtBirth = "Dvořáková",
+                forenameAtBirth = "Božena Růžena",
+                personalIdentificationNumbers = listOf(
+                    PersonIdInfo(
+                        country = "CZ",
+                        personalIdentificationNumber = "7812036789",
+                        sector = "01",
+                        institutionID = "CZ:CSSZ001",
+                        institutionName = "Česká správa sociálního zabezpečení"
+                    )
+                ),
+                placeBirth = PlaceBirthInfo(
+                    town = "Brno",
+                    region = "Jihomoravský kraj",
+                    country = "CZ"
+                ),
+                nationality = "CZ",
                 reimbursementRequestID = "111111",
                 sequentialNumber = "5",
                 institutionID = "NO:NAVAT08",
                 institutionName = "NAVAT08",
                 workingPeriodStart = "2019-01-01",
-                workingPeriodEnd = "2019-12-31",
-                reimbursementPeriodStart = "2024-01-01",
-                reimbursementPeriodEnd = "2024-12-31",
-                lastPaymentDate = "2020-01-15",
-                requestedAmount = "300",
+                workingPeriodEnd = "2020-12-31",
+                reimbursementPeriodStart = "2025-01-01",
+                reimbursementPeriodEnd = "2025-12-31",
+                lastPaymentDate = "2021-01-15",
+                requestedAmount = "850",
                 requestedCurrency = "EUR"
             )
         )

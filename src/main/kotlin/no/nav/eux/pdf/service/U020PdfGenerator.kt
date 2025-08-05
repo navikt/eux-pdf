@@ -1,11 +1,14 @@
 package no.nav.eux.pdf.service
 
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
+import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts
+import org.apache.pdfbox.pdmodel.font.PDFont
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.LocalDate
@@ -80,9 +83,8 @@ class EessiU020PdfGen {
     val marginTop = 40f
     val marginBottom = 50f
     val lineHeight = 16f
-    val boldFont = PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
-    val regularFont = PDType1Font(Standard14Fonts.FontName.HELVETICA)
-    val italicFont = PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
+
+    private val log = logger {}
 
     fun generateU020Document(master: U020Master, claims: List<U020Child>): ByteArray =
         try {
@@ -114,6 +116,11 @@ class EessiU020PdfGen {
         var contentStream: PDPageContentStream = PDPageContentStream(document, currentPage)
         var currentY: Float = pageHeight - marginTop
         var pageNumber: Int = 1
+
+        // Initialize Unicode-supporting fonts
+        val boldFont by lazy { loadUnicodeFont("NotoSans-Bold.ttf") }
+        val regularFont by lazy { loadUnicodeFont("NotoSans-Regular.ttf") }
+        val italicFont by lazy { loadUnicodeFont("NotoSans-Italic.ttf") }
 
         private fun createNewPage(): PDPage {
             val page = PDPage(PDRectangle.A4)
@@ -418,6 +425,78 @@ class EessiU020PdfGen {
             contentStream.newLineAtOffset(pageWidth - marginRight - textWidth, pageHeight - marginTop - 10f)
             contentStream.showText(text)
             contentStream.endText()
+        }
+
+        /**
+         * Loads a Unicode-supporting font. Uses built-in system fonts or falls back to Helvetica.
+         */
+        private fun loadUnicodeFont(preferredFont: String): PDFont {
+            return try {
+                // Try to load a system font that supports Unicode
+                // This will work on most systems with Java's built-in font support
+                val fontStream = javaClass.getResourceAsStream("/fonts/$preferredFont")
+                if (fontStream != null) {
+                    PDType0Font.load(document, fontStream)
+                } else {
+                    // Fallback: Use built-in font with character replacement
+                    log.info { "Unicode font $preferredFont not found, using system default with character sanitization" }
+                    createFallbackFont(preferredFont)
+                }
+            } catch (e: Exception) {
+                log.warn(e) { "Failed to load Unicode font $preferredFont, using fallback" }
+                createFallbackFont(preferredFont)
+            }
+        }
+
+        /**
+         * Creates a fallback font using PDFBox built-ins
+         */
+        private fun createFallbackFont(requestedFont: String): PDFont {
+            return try {
+                // Use PDFBox's built-in Liberation fonts which support more Unicode characters
+                when {
+                    requestedFont.contains("Bold") -> {
+                        // Try to load Liberation Sans Bold from PDFBox resources
+                        val fontStream = this::class.java.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Bold.ttf")
+                        if (fontStream != null) {
+                            fontStream.use { stream ->
+                                PDType0Font.load(document, stream)
+                            }
+                        } else {
+                            // Ultimate fallback - use standard font
+                            log.warn { "No Unicode fonts available, falling back to Helvetica" }
+                            PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
+                        }
+                    }
+                    requestedFont.contains("Italic") -> {
+                        val fontStream = this::class.java.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Italic.ttf")
+                        if (fontStream != null) {
+                            fontStream.use { stream ->
+                                PDType0Font.load(document, stream)
+                            }
+                        } else {
+                            PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
+                        }
+                    }
+                    else -> {
+                        val fontStream = this::class.java.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")
+                        if (fontStream != null) {
+                            fontStream.use { stream ->
+                                PDType0Font.load(document, stream)
+                            }
+                        } else {
+                            PDType1Font(Standard14Fonts.FontName.HELVETICA)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                log.warn(e) { "All font loading attempts failed, using basic Helvetica" }
+                when {
+                    requestedFont.contains("Bold") -> PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
+                    requestedFont.contains("Italic") -> PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
+                    else -> PDType1Font(Standard14Fonts.FontName.HELVETICA)
+                }
+            }
         }
     }
 
