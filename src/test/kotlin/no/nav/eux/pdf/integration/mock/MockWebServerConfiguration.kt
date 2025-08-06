@@ -142,14 +142,13 @@ class MockWebServerConfiguration(
             setBody("""{"error": "Mock endpoint not found"}""")
         }
 
-    private fun loadMockFile(fileName: String): String {
-        return try {
+    private fun loadMockFile(fileName: String): String =
+        try {
             ClassPathResource("mocks/$fileName").inputStream.bufferedReader().use { it.readText() }
         } catch (e: Exception) {
             log.error(e) { "Failed to load mock file: $fileName" }
             """{"error": "Mock file not found: $fileName"}"""
         }
-    }
 
     @PreDestroy
     fun shutdown() {

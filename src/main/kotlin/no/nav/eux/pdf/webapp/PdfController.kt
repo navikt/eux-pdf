@@ -1,5 +1,6 @@
 package no.nav.eux.pdf.webapp
 
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -7,8 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.eux.logging.clearLocalMdc
+import no.nav.eux.logging.mdc
 import no.nav.eux.pdf.service.U020PdfService
 import no.nav.security.token.support.core.api.Protected
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_PDF_VALUE
@@ -25,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController
 class PdfController(
     val u020PdfService: U020PdfService
 ) {
+
+    private val log = logger {}
 
     @GetMapping("/rinasak/{caseId}/document/u020/{documentId}", produces = [APPLICATION_PDF_VALUE])
     @Operation(
@@ -79,15 +85,18 @@ class PdfController(
         )
         @PathVariable documentId: String
     ): ResponseEntity<ByteArray> {
+        mdc(rinasakId = caseId)
         val pdfBytes = u020PdfService.u020Pdf(caseId, documentId)
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_PDF
-            contentDisposition = org.springframework.http.ContentDisposition
+            contentDisposition = ContentDisposition
                 .attachment()
                 .filename("U020-reimbursement-request.pdf")
                 .build()
             contentLength = pdfBytes.size.toLong()
         }
+        log.info { "PDF generated successfully" }
+        clearLocalMdc()
         return ResponseEntity.ok()
             .headers(headers)
             .body(pdfBytes)
