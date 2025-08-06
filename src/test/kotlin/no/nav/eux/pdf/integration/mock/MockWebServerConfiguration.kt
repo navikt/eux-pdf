@@ -67,18 +67,21 @@ class MockWebServerConfiguration(
                     setBody("""{"error": "Document not found"}""")
                 }
 
-            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments") == true &&
-            request.path?.contains("subdoc_") == false ->
-                subdocumentsCollectionResponse()
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments"
+            ) == true && request.path?.contains("subdoc_") == false -> subdocumentsCollectionResponse()
 
-            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_001") == true ->
-                childDocumentResponse("u020-child-document-001.json")
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_001"
+            ) == true -> childDocumentResponse("u020-child-document-001.json")
 
-            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_002") == true ->
-                childDocumentResponse("u020-child-document-002.json")
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_002"
+            ) == true -> childDocumentResponse("u020-child-document-002.json")
 
-            request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_003") == true ->
-                childDocumentResponse("u020-child-document-003.json")
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_003"
+            ) == true -> childDocumentResponse("u020-child-document-003.json")
 
             else -> defaultResponse()
         }
