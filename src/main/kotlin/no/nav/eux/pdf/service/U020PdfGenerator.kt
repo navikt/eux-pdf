@@ -293,131 +293,192 @@ class EessiU020PdfGen {
         fun writeIndividualClaims(claims: List<U020Child>) {
             if (claims.isEmpty()) return
 
+            startNewPageForClaims()
+            writeSectionHeader("Enkeltkrav")
+
+            claims.forEachIndexed { index, claim ->
+                writeSingleClaim(claim, index, claims.size)
+            }
+
+            writeFooter()
+            contentStream.close()
+        }
+
+        private fun startNewPageForClaims() {
             writeFooter()
             contentStream.close()
             currentPage = createNewPage()
             contentStream = PDPageContentStream(document, currentPage)
             currentY = pageHeight - marginTop
             pageNumber++
+        }
 
-            writeSectionHeader("Enkeltkrav")
+        private fun writeSingleClaim(claim: U020Child, index: Int, totalClaims: Int) {
+            val requiredSpace = calculateRequiredSpace(claim)
+            ensureSufficientSpace(requiredSpace)
 
-            claims.forEachIndexed { index, claim ->
-                var additionalLines = 6
-                if (claim.personalIdentificationNumbers?.isNotEmpty() == true)
-                    additionalLines += claim.personalIdentificationNumbers.size + 1
+            if (index > 0) addBlankLine()
 
-                val requiredSpace = 120f + (additionalLines * lineHeight)
+            writeSubsectionHeader("Krav ${index + 1}")
+            writeClaimDetails(claim)
 
-                if (currentY - requiredSpace < marginBottom + 30f) {
-                    writeFooter()
-                    contentStream.close()
-                    currentPage = createNewPage()
-                    contentStream = PDPageContentStream(document, currentPage)
-                    currentY = pageHeight - marginTop
-                    pageNumber++
+            if (shouldDrawSeparator(index, totalClaims)) {
+                drawClaimSeparator()
+            }
+        }
+
+        private fun calculateRequiredSpace(claim: U020Child): Float {
+            val baseLines = 6
+            val additionalLines = claim.personalIdentificationNumbers
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { it.size + 1 }
+                ?: 0
+            return 120f + ((baseLines + additionalLines) * lineHeight)
+        }
+
+        private fun ensureSufficientSpace(requiredSpace: Float) {
+            if (currentY - requiredSpace < marginBottom + 30f) {
+                writeFooter()
+                contentStream.close()
+                currentPage = createNewPage()
+                contentStream = PDPageContentStream(document, currentPage)
+                currentY = pageHeight - marginTop
+                pageNumber++
+            }
+        }
+
+        private fun writeClaimDetails(claim: U020Child) {
+            writePersonalIdentificationNumbers(claim.personalIdentificationNumbers)
+            writePersonalInformation(claim)
+            writeInstitutionalInformation(claim)
+        }
+
+        private fun writePersonalIdentificationNumbers(pins: List<PersonIdInfo>?) {
+            pins?.takeIf { it.isNotEmpty() }?.let { idNumbers ->
+                writeIdNumbersHeader()
+                idNumbers.forEach { pin ->
+                    writeIdNumber(pin)
                 }
+                restoreDefaultTextColor()
+                addSmallSpace()
+            }
+        }
 
-                if (index > 0)
-                    addBlankLine()
+        private fun writeIdNumbersHeader() {
+            contentStream.beginText()
+            contentStream.setFont(boldFont, 12f)
+            contentStream.setNonStrokingColor(0f, 0f, 0f)
+            contentStream.newLineAtOffset(marginLeft + 30f, currentY)
+            contentStream.showText("ID-nummer:")
+            contentStream.endText()
+            currentY -= 16f
+        }
 
-                writeSubsectionHeader("Krav ${index + 1}")
+        private fun writeIdNumber(pin: PersonIdInfo) {
+            val maskedPnr = maskNorwegianPnr(pin.personalIdentificationNumber, pin.country)
+            contentStream.beginText()
+            contentStream.setFont(regularFont, 12f)
+            contentStream.setNonStrokingColor(0.3f, 0.3f, 0.3f)
+            contentStream.newLineAtOffset(marginLeft + 45f, currentY)
+            contentStream.showText("${pin.country}: $maskedPnr (${pin.sector})")
+            contentStream.endText()
+            currentY -= 16f
+        }
 
-                claim.personalIdentificationNumbers?.let { pins ->
-                    if (pins.isNotEmpty()) {
-                        contentStream.beginText()
-                        contentStream.setFont(boldFont, 12f)
-                        contentStream.setNonStrokingColor(0f, 0f, 0f)
-                        contentStream.newLineAtOffset(marginLeft + 30f, currentY)
-                        contentStream.showText("ID-nummer:")
-                        contentStream.endText()
-                        currentY -= 16f
+        private fun restoreDefaultTextColor() {
+            contentStream.setNonStrokingColor(0f, 0f, 0f)
+        }
 
-                        pins.forEach { pin ->
-                            val maskedPnr = maskNorwegianPnr(pin.personalIdentificationNumber, pin.country)
-                            contentStream.beginText()
-                            contentStream.setFont(regularFont, 12f)
-                            contentStream.setNonStrokingColor(0.3f, 0.3f, 0.3f)
-                            contentStream.newLineAtOffset(marginLeft + 45f, currentY)
-                            contentStream.showText("${pin.country}: $maskedPnr (${pin.sector})")
-                            contentStream.endText()
-                            currentY -= 16f
-                        }
-                        contentStream.setNonStrokingColor(0f, 0f, 0f)
-                        addSmallSpace()
-                    }
-                }
+        private fun writePersonalInformation(claim: U020Child) {
+            val columnX = marginLeft + 30f
 
-                val columnX = marginLeft + 30f
+            writeBasicPersonalInfo(claim, columnX)
+            writeBirthInfo(claim, columnX)
+            writeOptionalPersonalInfo(claim, columnX)
+        }
 
-                writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
+        private fun writeBasicPersonalInfo(claim: U020Child, columnX: Float) {
+            writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
+            currentY -= 16f
+
+            claim.familyNameAtBirth?.let {
+                writeCompactKeyValuePair("Etternavn ved fødsel", it, columnX)
                 currentY -= 16f
-
-                claim.familyNameAtBirth?.let {
-                    writeCompactKeyValuePair("Etternavn ved fødsel", it, columnX)
-                    currentY -= 16f
-                }
-                claim.forenameAtBirth?.let {
-                    writeCompactKeyValuePair("Fornavn ved fødsel", it, columnX)
-                    currentY -= 16f
-                }
-
-                writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), columnX)
+            }
+            claim.forenameAtBirth?.let {
+                writeCompactKeyValuePair("Fornavn ved fødsel", it, columnX)
                 currentY -= 16f
-                writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), columnX)
+            }
+        }
+
+        private fun writeBirthInfo(claim: U020Child, columnX: Float) {
+            writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), columnX)
+            currentY -= 16f
+            writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), columnX)
+            currentY -= 16f
+
+            formatPlaceOfBirth(claim.placeBirth)?.let { placeText ->
+                writeCompactKeyValuePair("Fødselssted", placeText, columnX)
                 currentY -= 16f
+            }
+        }
 
-                claim.nationality?.let {
-                    writeCompactKeyValuePair("Nasjonalitet", it, columnX)
-                    currentY -= 16f
-                }
-
-                val placeText = claim.placeBirth?.let { place ->
-                    listOfNotNull(place.town, place.region, place.country)
-                        .filter { it.isNotBlank() }
-                        .joinToString(", ")
-                        .takeIf { it.isNotBlank() }
-                }
-                placeText?.let {
-                    writeCompactKeyValuePair("Fødselssted", it, columnX)
-                    currentY -= 16f
-                }
-
-                writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, columnX)
+        private fun writeOptionalPersonalInfo(claim: U020Child, columnX: Float) {
+            claim.nationality?.let {
+                writeCompactKeyValuePair("Nasjonalitet", it, columnX)
                 currentY -= 16f
-                writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", columnX)
-                currentY -= 16f
+            }
+        }
 
-                writeCompactKeyValuePair(
-                    "Arbeidsperiode",
-                    "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", columnX
-                )
-                currentY -= 16f
-                writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), columnX)
-                currentY -= 16f
-
-                writeCompactKeyValuePair(
-                    "Refusjonsperiode",
-                    "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}",
-                    columnX
-                )
-                currentY -= 16f
-                writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", columnX)
-                currentY -= 17f
-
-                if (index < claims.size - 1) {
-                    contentStream.setLineWidth(0.5f)
-                    contentStream.setStrokingColor(0.9f, 0.9f, 0.9f)
-                    contentStream.moveTo(marginLeft + 20f, currentY)
-                    contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
-                    contentStream.stroke()
-
-                    currentY -= 8f
-                }
+        private fun formatPlaceOfBirth(placeBirth: PlaceBirthInfo?): String? =
+            placeBirth?.let { place ->
+                listOfNotNull(place.town, place.region, place.country)
+                    .filter { it.isNotBlank() }
+                    .joinToString(", ")
+                    .takeIf { it.isNotBlank() }
             }
 
-            writeFooter()
-            contentStream.close()
+        private fun writeInstitutionalInformation(claim: U020Child) {
+            val columnX = marginLeft + 30f
+
+            writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, columnX)
+            currentY -= 16f
+
+            writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", columnX)
+            currentY -= 16f
+
+            writePeriodInformation(claim, columnX)
+            writeAmountInformation(claim, columnX)
+        }
+
+        private fun writePeriodInformation(claim: U020Child, columnX: Float) {
+            val workingPeriod = "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}"
+            writeCompactKeyValuePair("Arbeidsperiode", workingPeriod, columnX)
+            currentY -= 16f
+
+            writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), columnX)
+            currentY -= 16f
+
+            val reimbursementPeriod = "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}"
+            writeCompactKeyValuePair("Refusjonsperiode", reimbursementPeriod, columnX)
+            currentY -= 16f
+        }
+
+        private fun writeAmountInformation(claim: U020Child, columnX: Float) {
+            writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", columnX)
+            currentY -= 17f
+        }
+
+        private fun shouldDrawSeparator(index: Int, totalClaims: Int): Boolean =
+            index < totalClaims - 1
+
+        private fun drawClaimSeparator() {
+            contentStream.setLineWidth(0.5f)
+            contentStream.setStrokingColor(0.9f, 0.9f, 0.9f)
+            contentStream.moveTo(marginLeft + 20f, currentY)
+            contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
+            contentStream.stroke()
+            currentY -= 8f
         }
 
         fun writeRinasakIdTopRight(rinasakId: String) {
