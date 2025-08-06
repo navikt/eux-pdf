@@ -7,8 +7,6 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDFont
 import org.apache.pdfbox.pdmodel.font.PDType0Font
-import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.time.LocalDate
@@ -82,7 +80,7 @@ class EessiU020PdfGen {
     val marginRight = 50f
     val marginTop = 40f
     val marginBottom = 50f
-    val lineHeight = 16f
+    val lineHeight = 18f
 
     private val log = logger {}
 
@@ -116,11 +114,9 @@ class EessiU020PdfGen {
         var contentStream: PDPageContentStream = PDPageContentStream(document, currentPage)
         var currentY: Float = pageHeight - marginTop
         var pageNumber: Int = 1
-
-        // Initialize Unicode-supporting fonts
-        val boldFont by lazy { loadUnicodeFont("NotoSans-Bold.ttf") }
-        val regularFont by lazy { loadUnicodeFont("NotoSans-Regular.ttf") }
-        val italicFont by lazy { loadUnicodeFont("NotoSans-Italic.ttf") }
+        val boldFont by lazy { loadFont("NotoSans-Bold.ttf") }
+        val regularFont by lazy { loadFont("NotoSans-Regular.ttf") }
+        val italicFont by lazy { loadFont("NotoSans-Italic.ttf") }
 
         private fun createNewPage(): PDPage {
             val page = PDPage(PDRectangle.A4)
@@ -223,16 +219,16 @@ class EessiU020PdfGen {
         fun writeKeyValuePair(key: String, value: String, indent: Float = 20f) {
             checkPageSpace()
             val keyText = "$key:"
-            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 9f
+            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 12f
 
             contentStream.beginText()
-            contentStream.setFont(boldFont, 9f)
+            contentStream.setFont(boldFont, 12f)
             contentStream.newLineAtOffset(marginLeft + indent, currentY)
             contentStream.showText(keyText)
             contentStream.endText()
 
             contentStream.beginText()
-            contentStream.setFont(regularFont, 9f)
+            contentStream.setFont(regularFont, 12f)
             contentStream.newLineAtOffset(marginLeft + indent + keyWidth + 5f, currentY)
             contentStream.showText(value)
             contentStream.endText()
@@ -242,16 +238,16 @@ class EessiU020PdfGen {
 
         fun writeCompactKeyValuePair(key: String, value: String, startX: Float) {
             val keyText = "$key:"
-            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 8f
+            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 12f
 
             contentStream.beginText()
-            contentStream.setFont(boldFont, 8f)
+            contentStream.setFont(boldFont, 12f)
             contentStream.newLineAtOffset(startX, currentY)
             contentStream.showText(keyText)
             contentStream.endText()
 
             contentStream.beginText()
-            contentStream.setFont(regularFont, 8f)
+            contentStream.setFont(regularFont, 12f)
             contentStream.newLineAtOffset(startX + keyWidth + 3f, currentY)
             contentStream.showText(value)
             contentStream.endText()
@@ -330,22 +326,22 @@ class EessiU020PdfGen {
                 claim.personalIdentificationNumbers?.let { pins ->
                     if (pins.isNotEmpty()) {
                         contentStream.beginText()
-                        contentStream.setFont(italicFont, 8f)
-                        contentStream.setNonStrokingColor(0.4f, 0.4f, 0.4f)
+                        contentStream.setFont(boldFont, 12f)
+                        contentStream.setNonStrokingColor(0f, 0f, 0f)
                         contentStream.newLineAtOffset(marginLeft + 30f, currentY)
                         contentStream.showText("ID-nummer:")
                         contentStream.endText()
-                        currentY -= 12f
+                        currentY -= 16f
 
                         pins.forEach { pin ->
                             val maskedPnr = maskNorwegianPnr(pin.personalIdentificationNumber, pin.country)
                             contentStream.beginText()
-                            contentStream.setFont(regularFont, 8f)
+                            contentStream.setFont(regularFont, 12f)
                             contentStream.setNonStrokingColor(0.3f, 0.3f, 0.3f)
                             contentStream.newLineAtOffset(marginLeft + 45f, currentY)
                             contentStream.showText("${pin.country}: $maskedPnr (${pin.sector})")
                             contentStream.endText()
-                            currentY -= 11f
+                            currentY -= 16f
                         }
                         contentStream.setNonStrokingColor(0f, 0f, 0f)
                         addSmallSpace()
@@ -355,51 +351,59 @@ class EessiU020PdfGen {
                 val columnX = marginLeft + 30f
 
                 writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
-                currentY -= 12f
+                currentY -= 16f
 
-                writeCompactKeyValuePair("Etternavn ved fødsel", claim.familyNameAtBirth ?: "-", columnX)
-                currentY -= 12f
-                writeCompactKeyValuePair("Fornavn ved fødsel", claim.forenameAtBirth ?: "-", columnX)
-                currentY -= 12f
+                claim.familyNameAtBirth?.let {
+                    writeCompactKeyValuePair("Etternavn ved fødsel", it, columnX)
+                    currentY -= 16f
+                }
+                claim.forenameAtBirth?.let {
+                    writeCompactKeyValuePair("Fornavn ved fødsel", it, columnX)
+                    currentY -= 16f
+                }
 
                 writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), columnX)
-                currentY -= 12f
+                currentY -= 16f
                 writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), columnX)
-                currentY -= 12f
+                currentY -= 16f
 
-                writeCompactKeyValuePair("Nasjonalitet", claim.nationality ?: "-", columnX)
-                currentY -= 12f
+                claim.nationality?.let {
+                    writeCompactKeyValuePair("Nasjonalitet", it, columnX)
+                    currentY -= 16f
+                }
 
                 val placeText = claim.placeBirth?.let { place ->
                     listOfNotNull(place.town, place.region, place.country)
                         .filter { it.isNotBlank() }
                         .joinToString(", ")
                         .takeIf { it.isNotBlank() }
-                } ?: "-"
-                writeCompactKeyValuePair("Fødselssted", placeText, columnX)
-                currentY -= 12f
+                }
+                placeText?.let {
+                    writeCompactKeyValuePair("Fødselssted", it, columnX)
+                    currentY -= 16f
+                }
 
                 writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, columnX)
-                currentY -= 12f
+                currentY -= 16f
                 writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", columnX)
-                currentY -= 12f
+                currentY -= 16f
 
                 writeCompactKeyValuePair(
                     "Arbeidsperiode",
                     "${formatDate(claim.workingPeriodStart)} - ${formatDate(claim.workingPeriodEnd)}", columnX
                 )
-                currentY -= 12f
+                currentY -= 16f
                 writeCompactKeyValuePair("Siste utbetaling", formatDate(claim.lastPaymentDate), columnX)
-                currentY -= 12f
+                currentY -= 16f
 
                 writeCompactKeyValuePair(
                     "Refusjonsperiode",
                     "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}",
                     columnX
                 )
-                currentY -= 12f
+                currentY -= 16f
                 writeCompactKeyValuePair("Beløp", "${claim.requestedAmount} ${claim.requestedCurrency}", columnX)
-                currentY -= 15f
+                currentY -= 17f
 
                 if (index < claims.size - 1) {
                     contentStream.setLineWidth(0.5f)
@@ -427,53 +431,11 @@ class EessiU020PdfGen {
             contentStream.endText()
         }
 
-        private fun loadUnicodeFont(preferredFont: String): PDFont = try {
-                val fontStream = javaClass.getResourceAsStream("/fonts/$preferredFont")
-                if (fontStream != null) {
-                    PDType0Font.load(document, fontStream)
-                } else {
-                    log.info { "Unicode font $preferredFont not found, using system default with character sanitization" }
-                    createFallbackFont(preferredFont)
-                }
-            } catch (e: Exception) {
-                log.warn(e) { "Failed to load Unicode font $preferredFont, using fallback" }
-                createFallbackFont(preferredFont)
-            }
-
-        private fun createFallbackFont(requestedFont: String): PDFont =
-            try {
-                when {
-                    requestedFont.contains("Bold") -> {
-                        val fontStream = this::class.java
-                            .getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Bold.ttf")
-                        fontStream?.use { PDType0Font.load(document, it) } ?: run {
-                            log.warn { "No Unicode fonts available, falling back to Helvetica" }
-                            PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
-                        }
-                    }
-
-                    requestedFont.contains("Italic") -> {
-                        val fontStream = this::class.java
-                            .getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Italic.ttf")
-                        fontStream?.use { PDType0Font.load(document, it) }
-                            ?: PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
-                    }
-
-                    else -> {
-                        val fontStream = this::class.java
-                            .getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")
-                        fontStream?.use { PDType0Font.load(document, it) }
-                            ?: PDType1Font(Standard14Fonts.FontName.HELVETICA)
-                    }
-                }
-            } catch (e: Exception) {
-                log.warn(e) { "All font loading attempts failed, using basic Helvetica" }
-                when {
-                    requestedFont.contains("Bold") -> PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD)
-                    requestedFont.contains("Italic") -> PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE)
-                    else -> PDType1Font(Standard14Fonts.FontName.HELVETICA)
-                }
-            }
+        private fun loadFont(fontFileName: String): PDFont {
+            val fontStream = javaClass.getResourceAsStream("/fonts/$fontFileName")
+                ?: throw IllegalStateException("Font file $fontFileName not found in resources/fonts/")
+            return PDType0Font.load(document, fontStream)
+        }
     }
 
 
