@@ -12,7 +12,7 @@ class U029PdfService(
         caseId: Int,
         documentId: String
     ): ByteArray {
-        TODO()
+        TODO("Implement service logic similar to how it is for u020")
     }
 
 }

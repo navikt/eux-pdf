@@ -101,4 +101,24 @@ class PdfController(
             .headers(headers)
             .body(pdfBytes)
     }
+
+
+    @GetMapping("/rinasak/{caseId}/document/u029/{documentId}", produces = [APPLICATION_PDF_VALUE])
+    fun getU029Pdf(
+        @Parameter(
+            description = "RINA case ID",
+            example = "1452974",
+            required = true
+        )
+        @PathVariable caseId: Int,
+        @Parameter(
+            description = "U020 master document ID (UUID format)",
+            example = "9ed70cf2501049a3ad625cacc77e1087",
+            required = true
+        )
+        @PathVariable documentId: String
+    ): ResponseEntity<ByteArray> {
+        mdc(rinasakId = caseId)
+        TODO()
+    }
 }

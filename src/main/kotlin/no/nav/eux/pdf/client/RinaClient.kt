@@ -105,4 +105,6 @@ class RinaClient(
             }
             .toEntity<U020ChildDocument>()
             .body!!
+
+    //TODO we need 3 new methods to get U029_Subdocuments.json, U029_Master.json and U029_Child_*.json
 }
