@@ -149,7 +149,7 @@ class EessiU029PdfGen {
             contentStream.beginText()
             contentStream.setFont(boldFont, 18f)
             contentStream.newLineAtOffset(marginLeft, currentY)
-            contentStream.showText("U029 - Bestridelse av refusjonsforespørsel")
+            contentStream.showText("U029 - Endret anmodning om refusjon etter bestridelse")
             contentStream.endText()
 
             currentY -= 15f
@@ -249,9 +249,9 @@ class EessiU029PdfGen {
             writeSectionHeader("Dokumentinformasjon")
 
             writeKeyValuePair("SED-versjon", "${master.sedGVer}.${master.sedVer}")
-            writeKeyValuePair("Forespørsel-ID", master.reimbursementRequestID)
-            writeKeyValuePair("Bestridelse-ID", master.reimbursementContestationID)
-            writeKeyValuePair("Endret forespørsel-ID", master.amendedReimbursementRequestID)
+            writeKeyValuePair("ID-nummer for krav om refusjon", master.reimbursementRequestID)
+            writeKeyValuePair("ID bestridelse av refusjon", master.reimbursementContestationID)
+            writeKeyValuePair("ID for endret anmodning om refusjon", master.amendedReimbursementRequestID)
             writeKeyValuePair("Oppdatert totalbeløp", "${master.updatedTotalAmount} ${master.currency}")
 
             master.localCaseNumbers?.let { cases ->
@@ -340,23 +340,23 @@ class EessiU029PdfGen {
         private fun writeClaimInformation(claim: U029Child) {
             val columnX = marginLeft + 30f
 
-            writeCompactKeyValuePair("Forespørsel-ID", claim.reimbursementRequestID, columnX)
+            writeCompactKeyValuePair("ID-nummer for krav om refusjon", claim.reimbursementRequestID, columnX)
             currentY -= 16f
-            writeCompactKeyValuePair("Bestridelse-ID", claim.reimbursementContestationID, columnX)
+            writeCompactKeyValuePair("ID bestridelse av refusjon", claim.reimbursementContestationID, columnX)
             currentY -= 16f
-            writeCompactKeyValuePair("Endret forespørsel-ID", claim.amendedReimbursementRequestID, columnX)
+            writeCompactKeyValuePair("ID for endret anmodning om refusjon", claim.amendedReimbursementRequestID, columnX)
             currentY -= 16f
-            writeCompactKeyValuePair("Sekvensnr", claim.sequentialNumber, columnX)
+            writeCompactKeyValuePair("Løpenummer for enkeltkrav", claim.sequentialNumber, columnX)
             currentY -= 16f
             writeCompactKeyValuePair("Status", getStatusDescription(claim.status), columnX)
             currentY -= 16f
 
             claim.contestedIndividualClaimID?.let {
-                writeCompactKeyValuePair("Bestridt krav-ID", it, columnX)
+                writeCompactKeyValuePair("ID bestridelse av enkeltkrav", it, columnX)
                 currentY -= 16f
             }
             claim.amendedContestedIndividualClaimID?.let {
-                writeCompactKeyValuePair("Endret bestridt krav-ID", it, columnX)
+                writeCompactKeyValuePair("ID for endret bestridelse av enkeltkrav", it, columnX)
                 currentY -= 16f
             }
         }
