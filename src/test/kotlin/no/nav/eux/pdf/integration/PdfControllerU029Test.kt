@@ -19,8 +19,6 @@ import kotlin.test.assertTrue
 @DisplayName("U029 PDF Generation Integration Tests")
 class PdfControllerU029Test : AbstractPdfApiImplTest() {
 
-    //TODO remake me to target U029 instead of U020!
-
     @BeforeEach
     fun setUp() {
         requestBodies.clear()
@@ -31,26 +29,26 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
     inner class SuccessfulPdfGeneration {
 
         @Test
-        @DisplayName("Should generate complete U020 PDF with all document components")
-        fun shouldGenerateCompleteU020Pdf() {
-            logTestInfo("Testing complete U020 PDF generation")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+        @DisplayName("Should generate complete U029 PDF with all document components")
+        fun shouldGenerateCompleteU029Pdf() {
+            logTestInfo("Testing complete U029 PDF generation")
+            val response = callPdfEndpoint(VALID_CASE_ID_U029, VALID_DOCUMENT_ID_U029)
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
-            savePdfForInspection(pdfBytes, "complete-u020")
+            savePdfForInspection(pdfBytes, "complete-u029")
 
             verifyAllRinaEndpointsWereCalled()
             verifyExpectedSubdocumentsCalled()
 
-            logTestSuccess("Successfully generated complete U020 PDF", pdfBytes.size)
+            logTestSuccess("Successfully generated complete U029 PDF", pdfBytes.size)
         }
 
         @Test
         @DisplayName("Should handle multiple individual claims correctly")
         fun shouldHandleMultipleIndividualClaims() {
             logTestInfo("Testing PDF generation with multiple individual claims")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U029, VALID_DOCUMENT_ID_U029)
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -58,7 +56,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
 
             assertTrue(
                 pdfBytes.size > 3000,
-                "PDF with 3 individual claims should be substantial, was ${pdfBytes.size} bytes"
+                "PDF with 2 individual claims should be substantial, was ${pdfBytes.size} bytes"
             )
 
             verifyAllSubdocumentsProcessed()
@@ -74,7 +72,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
         @DisplayName("Should return 404 when case is not found")
         fun shouldReturn404WhenCaseNotFound() {
             logTestInfo("Testing 404 response for non-existent case")
-            val response = callPdfEndpointExpectingError(NON_EXISTENT_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpointExpectingError(NON_EXISTENT_CASE_ID, VALID_DOCUMENT_ID_U029)
             assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
             logTestSuccess("Correctly returned 404 for non-existent case")
         }
@@ -83,7 +81,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
         @DisplayName("Should return 404 when document is not found")
         fun shouldReturn404WhenDocumentNotFound() {
             logTestInfo("Testing 404 response for non-existent document")
-            val response = callPdfEndpointExpectingError(VALID_CASE_ID, NON_EXISTENT_DOCUMENT_ID)
+            val response = callPdfEndpointExpectingError(VALID_CASE_ID_U029, NON_EXISTENT_DOCUMENT_ID)
             assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
             logTestSuccess("Correctly returned 404 for non-existent document")
         }
@@ -93,7 +91,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
         fun shouldReturn401WhenNotAuthenticated() {
             logTestInfo("Testing 401 response for unauthenticated request")
             val response = restTemplate.exchange(
-                "/api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID",
+                "/api/v1/rinasak/$VALID_CASE_ID_U029/document/u029/$VALID_DOCUMENT_ID_U029",
                 HttpMethod.GET,
                 null,
                 String::class.java
@@ -111,12 +109,12 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
         @DisplayName("Should return correct HTTP headers for PDF download")
         fun shouldReturnCorrectHttpHeaders() {
             logTestInfo("Testing PDF response headers")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U029, VALID_DOCUMENT_ID_U029)
             assertSuccessfulPdfResponse(response)
             val contentDisposition = response.headers.contentDisposition
             assertNotNull(contentDisposition, "Content-Disposition header should be present")
             assertEquals("attachment", contentDisposition.type, "Should be attachment type")
-            assertEquals(EXPECTED_FILENAME, contentDisposition.filename, "Should have correct filename")
+            assertEquals(EXPECTED_FILENAME_U029, contentDisposition.filename, "Should have correct filename")
 
             logTestSuccess("All HTTP headers are correct")
         }
@@ -125,7 +123,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
         @DisplayName("Should generate valid PDF format")
         fun shouldGenerateValidPdfFormat() {
             logTestInfo("Testing PDF format validation")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U029, VALID_DOCUMENT_ID_U029)
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -145,7 +143,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
 
     private fun callPdfEndpoint(caseId: Int, documentId: String) =
         restTemplate.exchange(
-            "/api/v1/rinasak/$caseId/document/u020/$documentId",
+            "/api/v1/rinasak/$caseId/document/u029/$documentId",
             HttpMethod.GET,
             voidHttpEntity(mockOAuth2Server),
             ByteArray::class.java
@@ -153,7 +151,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
 
     private fun callPdfEndpointExpectingError(caseId: Int, documentId: String) =
         restTemplate.exchange(
-            "/api/v1/rinasak/$caseId/document/u020/$documentId",
+            "/api/v1/rinasak/$caseId/document/u029/$documentId",
             HttpMethod.GET,
             voidHttpEntity(mockOAuth2Server),
             String::class.java
@@ -168,38 +166,41 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
     private fun verifyAllRinaEndpointsWereCalled() {
         assertTrue(
             requestBodies.keys.any {
-                it.contains("/eessiRest/Cases/$VALID_CASE_ID/Documents/$VALID_DOCUMENT_ID") && !it.contains(
+                it.contains("/eessiRest/Cases/$VALID_CASE_ID_U029/Documents/$VALID_DOCUMENT_ID_U029") && !it.contains(
                     "/Subdocuments"
                 )
             },
-            "Master document endpoint should have been called"
+            "U029 master document endpoint should have been called"
         )
 
         assertTrue(
             requestBodies.keys.any {
-                it.contains("/eessiRest/Cases/$VALID_CASE_ID/Documents/$VALID_DOCUMENT_ID/Subdocuments") && !it.contains(
-                    "subdoc_"
-                )
+                it.contains("/eessiRest/Cases/$VALID_CASE_ID_U029/Documents/$VALID_DOCUMENT_ID_U029/Subdocuments") && !it.contains(
+                    U029_CHILD_DOCUMENT_ID_1
+                ) && !it.contains(U029_CHILD_DOCUMENT_ID_2)
             },
-            "Subdocuments collection endpoint should have been called"
+            "U029 subdocuments collection endpoint should have been called"
         )
     }
 
     private fun verifyExpectedSubdocumentsCalled() {
-        val expectedSubdocuments = listOf("subdoc_001", "subdoc_002", "subdoc_003")
+        val expectedSubdocuments = listOf(U029_CHILD_DOCUMENT_ID_1, U029_CHILD_DOCUMENT_ID_2)
         expectedSubdocuments.forEach { subdocId ->
             assertTrue(
                 requestBodies.keys.any { it.contains("/Subdocuments/$subdocId") },
-                "Subdocument endpoint for $subdocId should have been called"
+                "U029 subdocument endpoint for $subdocId should have been called"
             )
         }
     }
 
     private fun verifyAllSubdocumentsProcessed() {
-        val subdocumentCalls = requestBodies.keys.filter { it.contains("/Subdocuments/subdoc_") }
+        val subdocumentCalls = requestBodies.keys.filter {
+            it.contains("/Subdocuments/") &&
+            (it.contains(U029_CHILD_DOCUMENT_ID_1) || it.contains(U029_CHILD_DOCUMENT_ID_2))
+        }
         assertTrue(
-            subdocumentCalls.size >= 3,
-            "All 3 subdocuments should have been processed, " +
+            subdocumentCalls.size >= 2,
+            "All 2 U029 subdocuments should have been processed, " +
                     "found calls: ${subdocumentCalls.size}. Calls: $subdocumentCalls"
         )
     }
@@ -211,7 +212,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
         }
 
         val timestamp = System.currentTimeMillis()
-        val fileName = "U020-IT-$testName-$timestamp.pdf"
+        val fileName = "U029-IT-$testName-$timestamp.pdf"
         val pdfFile = File(targetDir, fileName)
 
         pdfFile.writeBytes(pdfBytes)
@@ -221,7 +222,7 @@ class PdfControllerU029Test : AbstractPdfApiImplTest() {
     private fun logTestInfo(message: String) {
         println("🧪 $message")
         println("📍 Mock server: http://localhost:9500")
-        println("📍 Endpoint: /api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID")
+        println("📍 Endpoint: /api/v1/rinasak/$VALID_CASE_ID_U029/document/u029/$VALID_DOCUMENT_ID_U029")
     }
 
     private fun logTestSuccess(message: String, pdfSize: Int? = null) {

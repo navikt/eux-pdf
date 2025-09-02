@@ -1,0 +1,59 @@
+{
+  "U029_Child": {
+    "IndividualClaim": {
+      "reimbursementRequestID": "1234567890",
+      "reimbursementContestationID": "bb3af3d91ece4d8a815d021e3e569b56",
+      "amendedReimbursementRequestID": "5f260979ccc1446ea26b8a8269118e3f",
+      "sequentialNumberIndividualClaim": "1",
+      "contestedIndividualClaimID": "372bd937ad22460e9507b9a4fa71320f",
+      "amendedContestedIndividualClaimID": "7ee54c4c6867494da00ce50fcb8e341f",
+      "IndividualClaimStatus": {
+        "status": {
+          "value": [
+            "01"
+          ]
+        }
+      },
+      "Person": {
+        "PersonIdentification": {
+          "familyName": "etter",
+          "forename": "for en",
+          "dateBirth": "2019-06-12",
+          "sex": {
+            "value": [
+              "01"
+            ]
+          }
+        }
+      },
+      "InstitutionWhichCertifiedInsuranceRecord": {
+        "TheInstitutionEXISTSInIR": {
+          "institutionID": "NO:NAVAT05",
+          "institutionName": "NAVAT 05"
+        }
+      },
+      "WorkingPeriodsConsidered": {
+        "WorkingPeriodConsidered": [
+          {
+            "startDate": "2025-06-13",
+            "endDate": "2029-10-18"
+          }
+        ]
+      },
+      "ReimbursementPeriod": {
+        "startDate": "2025-06-04",
+        "endDate": "2034-06-15"
+      },
+      "lastPaymentDate": "2026-07-02",
+      "RequestedAmountForReimbursement": {
+        "amount": "0",
+        "currency": {
+          "value": [
+            "EUR"
+          ]
+        }
+      }
+    }
+  }
+}
+

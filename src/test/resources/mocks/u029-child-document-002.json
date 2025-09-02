@@ -1,0 +1,58 @@
+{
+  "U029_Child": {
+    "IndividualClaim": {
+      "reimbursementRequestID": "1234567890",
+      "reimbursementContestationID": "bb3af3d91ece4d8a815d021e3e569b56",
+      "amendedReimbursementRequestID": "5f260979ccc1446ea26b8a8269118e3f",
+      "sequentialNumberIndividualClaim": "2",
+      "amendedContestedIndividualClaimID": "7a786f0f13b845198b14e8c6e126899d",
+      "IndividualClaimStatus": {
+        "status": {
+          "value": [
+            "01"
+          ]
+        }
+      },
+      "Person": {
+        "PersonIdentification": {
+          "familyName": "etter",
+          "forename": "for en",
+          "dateBirth": "2019-06-12",
+          "sex": {
+            "value": [
+              "01"
+            ]
+          }
+        }
+      },
+      "InstitutionWhichCertifiedInsuranceRecord": {
+        "TheInstitutionEXISTSInIR": {
+          "institutionID": "NO:NAVAT07",
+          "institutionName": "NO:NAVAT07"
+        }
+      },
+      "WorkingPeriodsConsidered": {
+        "WorkingPeriodConsidered": [
+          {
+            "startDate": "2025-06-04",
+            "endDate": "2021-02-03"
+          }
+        ]
+      },
+      "ReimbursementPeriod": {
+        "startDate": "2021-02-04",
+        "endDate": "2033-06-08"
+      },
+      "lastPaymentDate": "2022-03-03",
+      "RequestedAmountForReimbursement": {
+        "amount": "1000",
+        "currency": {
+          "value": [
+            "EUR"
+          ]
+        }
+      }
+    }
+  }
+}
+

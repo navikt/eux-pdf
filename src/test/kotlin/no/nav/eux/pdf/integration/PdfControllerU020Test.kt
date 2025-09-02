@@ -32,7 +32,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         @DisplayName("Should generate complete U020 PDF with all document components")
         fun shouldGenerateCompleteU020Pdf() {
             logTestInfo("Testing complete U020 PDF generation")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U20, VALID_DOCUMENT_ID_U020)
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -48,7 +48,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         @DisplayName("Should handle multiple individual claims correctly")
         fun shouldHandleMultipleIndividualClaims() {
             logTestInfo("Testing PDF generation with multiple individual claims")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U20, VALID_DOCUMENT_ID_U020)
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -72,7 +72,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         @DisplayName("Should return 404 when case is not found")
         fun shouldReturn404WhenCaseNotFound() {
             logTestInfo("Testing 404 response for non-existent case")
-            val response = callPdfEndpointExpectingError(NON_EXISTENT_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpointExpectingError(NON_EXISTENT_CASE_ID, VALID_DOCUMENT_ID_U020)
             assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
             logTestSuccess("Correctly returned 404 for non-existent case")
         }
@@ -81,7 +81,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         @DisplayName("Should return 404 when document is not found")
         fun shouldReturn404WhenDocumentNotFound() {
             logTestInfo("Testing 404 response for non-existent document")
-            val response = callPdfEndpointExpectingError(VALID_CASE_ID, NON_EXISTENT_DOCUMENT_ID)
+            val response = callPdfEndpointExpectingError(VALID_CASE_ID_U20, NON_EXISTENT_DOCUMENT_ID)
             assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
             logTestSuccess("Correctly returned 404 for non-existent document")
         }
@@ -91,7 +91,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         fun shouldReturn401WhenNotAuthenticated() {
             logTestInfo("Testing 401 response for unauthenticated request")
             val response = restTemplate.exchange(
-                "/api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID",
+                "/api/v1/rinasak/$VALID_CASE_ID_U20/document/u020/$VALID_DOCUMENT_ID_U020",
                 HttpMethod.GET,
                 null,
                 String::class.java
@@ -109,12 +109,12 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         @DisplayName("Should return correct HTTP headers for PDF download")
         fun shouldReturnCorrectHttpHeaders() {
             logTestInfo("Testing PDF response headers")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U20, VALID_DOCUMENT_ID_U020)
             assertSuccessfulPdfResponse(response)
             val contentDisposition = response.headers.contentDisposition
             assertNotNull(contentDisposition, "Content-Disposition header should be present")
             assertEquals("attachment", contentDisposition.type, "Should be attachment type")
-            assertEquals(EXPECTED_FILENAME, contentDisposition.filename, "Should have correct filename")
+            assertEquals(EXPECTED_FILENAME_U020, contentDisposition.filename, "Should have correct filename")
 
             logTestSuccess("All HTTP headers are correct")
         }
@@ -123,7 +123,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
         @DisplayName("Should generate valid PDF format")
         fun shouldGenerateValidPdfFormat() {
             logTestInfo("Testing PDF format validation")
-            val response = callPdfEndpoint(VALID_CASE_ID, VALID_DOCUMENT_ID)
+            val response = callPdfEndpoint(VALID_CASE_ID_U20, VALID_DOCUMENT_ID_U020)
             assertSuccessfulPdfResponse(response)
 
             val pdfBytes = response.body!!
@@ -166,7 +166,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
     private fun verifyAllRinaEndpointsWereCalled() {
         assertTrue(
             requestBodies.keys.any {
-                it.contains("/eessiRest/Cases/$VALID_CASE_ID/Documents/$VALID_DOCUMENT_ID") && !it.contains(
+                it.contains("/eessiRest/Cases/$VALID_CASE_ID_U20/Documents/$VALID_DOCUMENT_ID_U020") && !it.contains(
                     "/Subdocuments"
                 )
             },
@@ -175,7 +175,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
 
         assertTrue(
             requestBodies.keys.any {
-                it.contains("/eessiRest/Cases/$VALID_CASE_ID/Documents/$VALID_DOCUMENT_ID/Subdocuments") && !it.contains(
+                it.contains("/eessiRest/Cases/$VALID_CASE_ID_U20/Documents/$VALID_DOCUMENT_ID_U020/Subdocuments") && !it.contains(
                     "subdoc_"
                 )
             },
@@ -219,7 +219,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
     private fun logTestInfo(message: String) {
         println("🧪 $message")
         println("📍 Mock server: http://localhost:9500")
-        println("📍 Endpoint: /api/v1/rinasak/$VALID_CASE_ID/document/u020/$VALID_DOCUMENT_ID")
+        println("📍 Endpoint: /api/v1/rinasak/$VALID_CASE_ID_U20/document/u020/$VALID_DOCUMENT_ID_U020")
     }
 
     private fun logTestSuccess(message: String, pdfSize: Int? = null) {

@@ -56,11 +56,11 @@ class MockWebServerConfiguration(
                 }
 
             request.path?.contains("/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46") == true &&
-            request.path?.contains("/Subdocuments") == false ->
+                    request.path?.contains("/Subdocuments") == false ->
                 masterDocumentResponse()
 
             request.path?.contains("/eessiRest/Cases/123456/Documents/non-existent-document-id") == true &&
-            request.path?.contains("/Subdocuments") == false ->
+                    request.path?.contains("/Subdocuments") == false ->
                 MockResponse().apply {
                     setResponseCode(404)
                     setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -82,6 +82,24 @@ class MockWebServerConfiguration(
             request.path?.contains(
                 "/eessiRest/Cases/123456/Documents/f0293bae3c494391851a76d0f6f82f46/Subdocuments/subdoc_003"
             ) == true -> childDocumentResponse("u020-child-document-003.json")
+
+            // U029 Document endpoints
+            request.path?.contains("/eessiRest/Cases/123456/Documents/9ed70cf2501049a3ad625cacc77e1087") == true &&
+                    request.path?.contains("/Subdocuments") == false ->
+                u029MasterDocumentResponse()
+
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/9ed70cf2501049a3ad625cacc77e1087/Subdocuments"
+            ) == true && request.path?.contains("600f6e5c4e8f49b2ab1c6a5a8bf9b040") == false &&
+                    request.path?.contains("183ef9843a8b4f89985a8fe4120c66de") == false -> u029SubdocumentsCollectionResponse()
+
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/9ed70cf2501049a3ad625cacc77e1087/Subdocuments/600f6e5c4e8f49b2ab1c6a5a8bf9b040"
+            ) == true -> childDocumentResponse("u029-child-document-001.json")
+
+            request.path?.contains(
+                "/eessiRest/Cases/123456/Documents/9ed70cf2501049a3ad625cacc77e1087/Subdocuments/183ef9843a8b4f89985a8fe4120c66de"
+            ) == true -> childDocumentResponse("u029-child-document-002.json")
 
             else -> defaultResponse()
         }
@@ -111,7 +129,7 @@ class MockWebServerConfiguration(
         MockResponse().apply {
             setResponseCode(200)
             setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            setBody(loadMockFile("rinacase-123456.json"))
+            setBody(loadMockFile("rinacase-123456-u020.json"))
         }
 
     fun masterDocumentResponse() =
@@ -126,6 +144,20 @@ class MockWebServerConfiguration(
             setResponseCode(200)
             setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             setBody(loadMockFile("u020-subdocuments-collection.json"))
+        }
+
+    fun u029MasterDocumentResponse() =
+        MockResponse().apply {
+            setResponseCode(200)
+            setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            setBody(loadMockFile("u029-master-document.json"))
+        }
+
+    fun u029SubdocumentsCollectionResponse() =
+        MockResponse().apply {
+            setResponseCode(200)
+            setHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            setBody(loadMockFile("u029-subdocuments-collection.json"))
         }
 
     fun childDocumentResponse(fileName: String) =

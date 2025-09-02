@@ -1,0 +1,57 @@
+{
+  "id": 123456,
+  "subject": {
+    "name": "Ola",
+    "surname": "Nordmann",
+    "sex": "M",
+    "birthday": "1985-03-15"
+  },
+  "actions": [
+    {
+      "id": "action_003",
+      "name": "Create U029",
+      "template": "U029_template",
+      "operation": "CREATE",
+      "documentType": "U029"
+    },
+    {
+      "id": "action_004",
+      "name": "Send Document",
+      "template": "SEND_template",
+      "operation": "SEND",
+      "documentType": "U029"
+    }
+  ],
+  "processDefinitionName": "ReimbursementContestation",
+  "documents": [
+    {
+      "status": "ACTIVE",
+      "type": "U029"
+    },
+    {
+      "status": "DRAFT",
+      "type": "U029"
+    }
+  ],
+  "participants": [
+    {
+      "role": "SOURCE_INSTITUTION",
+      "organisation": {
+        "id": "NO:NAVAT05",
+        "name": "NAV ACC 05",
+        "countryCode": "NO"
+      },
+      "selected": true
+    },
+    {
+      "role": "DESTINATION_INSTITUTION",
+      "organisation": {
+        "id": "NO:NAVAT07",
+        "name": "NAV ACC 07",
+        "countryCode": "NO"
+      },
+      "selected": false
+    }
+  ]
+}
+
