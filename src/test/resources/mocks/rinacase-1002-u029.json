@@ -1,5 +1,5 @@
 {
-  "id": 123456,
+  "id": 1002,
   "subject": {
     "name": "Ola",
     "surname": "Nordmann",
@@ -8,37 +8,37 @@
   },
   "actions": [
     {
-      "id": "action_001",
-      "name": "Create U020",
-      "template": "U020_template",
+      "id": "action_003",
+      "name": "Create U029",
+      "template": "U029_template",
       "operation": "CREATE",
-      "documentType": "U020"
+      "documentType": "U029"
     },
     {
-      "id": "action_002",
+      "id": "action_004",
       "name": "Send Document",
       "template": "SEND_template",
       "operation": "SEND",
-      "documentType": "U020"
+      "documentType": "U029"
     }
   ],
-  "processDefinitionName": "ReimbursementRequest",
+  "processDefinitionName": "ReimbursementContestation",
   "documents": [
     {
       "status": "ACTIVE",
-      "type": "U020"
+      "type": "U029"
     },
     {
       "status": "DRAFT",
-      "type": "U020"
+      "type": "U029"
     }
   ],
   "participants": [
     {
       "role": "SOURCE_INSTITUTION",
       "organisation": {
-        "id": "NO:NAVT003",
-        "name": "NAV Trygd",
+        "id": "NO:NAVAT05",
+        "name": "NAV ACC 05",
         "countryCode": "NO"
       },
       "selected": true
@@ -46,12 +46,11 @@
     {
       "role": "DESTINATION_INSTITUTION",
       "organisation": {
-        "id": "DE:GKV001",
-        "name": "Deutsche Gesetzliche Krankenversicherung",
-        "countryCode": "DE"
+        "id": "NO:NAVAT07",
+        "name": "NAV ACC 07",
+        "countryCode": "NO"
       },
       "selected": false
     }
   ]
 }
-

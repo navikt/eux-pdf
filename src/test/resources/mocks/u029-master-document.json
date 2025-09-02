@@ -11,7 +11,7 @@
               "NO"
             ]
           },
-          "caseNumber": "123456",
+          "caseNumber": "1002",
           "Institution": {
             "institutionID": "NO:NAVAT05",
             "institutionName": "NAV ACC 05"
@@ -34,4 +34,3 @@
     }
   }
 }
-
