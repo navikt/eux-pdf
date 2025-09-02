@@ -1,4 +1,4 @@
-package no.nav.eux.pdf.model.domain
+package no.nav.eux.pdf.model.domain.u020
 
 data class U020SubdocumentsCollection(
     val totalCount: Int,

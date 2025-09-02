@@ -1,6 +1,8 @@
-package no.nav.eux.pdf.model.domain
+package no.nav.eux.pdf.model.domain.u020
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.eux.pdf.model.domain.Country
+import no.nav.eux.pdf.model.domain.Institution
 
 data class U020MasterDocument(
     @JsonProperty("U020_Master")

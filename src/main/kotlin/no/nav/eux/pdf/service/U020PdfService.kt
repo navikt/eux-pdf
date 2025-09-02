@@ -1,8 +1,8 @@
 package no.nav.eux.pdf.service
 
 import no.nav.eux.pdf.client.RinaClient
-import no.nav.eux.pdf.model.domain.U020ChildDocument
-import no.nav.eux.pdf.model.domain.U020MasterContent
+import no.nav.eux.pdf.model.domain.u020.U020ChildDocument
+import no.nav.eux.pdf.model.domain.u020.U020MasterContent
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException

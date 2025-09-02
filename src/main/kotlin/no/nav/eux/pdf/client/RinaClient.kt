@@ -3,9 +3,9 @@ package no.nav.eux.pdf.client
 import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import no.nav.eux.logging.mdc
 import no.nav.eux.pdf.config.RinaCpiServiceProperties
-import no.nav.eux.pdf.model.domain.U020ChildDocument
-import no.nav.eux.pdf.model.domain.U020MasterDocument
-import no.nav.eux.pdf.model.domain.U020SubdocumentsCollection
+import no.nav.eux.pdf.model.domain.u020.U020ChildDocument
+import no.nav.eux.pdf.model.domain.u020.U020MasterDocument
+import no.nav.eux.pdf.model.domain.u020.U020SubdocumentsCollection
 import no.nav.eux.pdf.model.rinasak.RinaCase
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
