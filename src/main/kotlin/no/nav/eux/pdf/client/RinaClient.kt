@@ -41,7 +41,7 @@ class RinaClient(
             .toEntity<RinaCase>()
             .body!!
 
-    fun getDocument(caseId: Int, documentId: String): U020MasterDocument =
+    fun u020MasterDocument(caseId: Int, documentId: String): U020MasterDocument =
         restClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId")
@@ -63,7 +63,7 @@ class RinaClient(
             .toEntity<U020MasterDocument>()
             .body!!
 
-    fun getSubdocuments(caseId: Int, documentId: String): U020SubdocumentsCollection = restClient
+    fun u020SubdocumentsCollection(caseId: Int, documentId: String): U020SubdocumentsCollection = restClient
         .get()
         .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments")
         .accept(APPLICATION_JSON)
@@ -84,7 +84,7 @@ class RinaClient(
         .toEntity<U020SubdocumentsCollection>()
         .body!!
 
-    fun getSubdocument(caseId: Int, documentId: String, subdocumentId: String): U020ChildDocument =
+    fun u020ChildDocument(caseId: Int, documentId: String, subdocumentId: String): U020ChildDocument =
         restClient
             .get()
             .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments/$subdocumentId")
