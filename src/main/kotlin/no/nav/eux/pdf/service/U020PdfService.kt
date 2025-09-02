@@ -37,7 +37,7 @@ class U020PdfService(
         val bankInfo = generalInfo.bankInformation
 
         val localCaseNumbers = master.localCaseNumbers?.localCaseNumber?.map { localCase ->
-            LocalCaseInfo(
+            U020LocalCaseInfo(
                 country = localCase.country.value.firstOrNull() ?: "",
                 caseNumber = localCase.caseNumber,
                 institutionID = localCase.institution?.institutionID,

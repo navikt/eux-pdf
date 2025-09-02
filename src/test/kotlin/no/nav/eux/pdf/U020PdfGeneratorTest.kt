@@ -22,13 +22,13 @@ class U020PdfGeneratorTest {
             bicSwift = "DEUTDEFF",
             bankReference = "tuut",
             localCaseNumbers = listOf(
-                LocalCaseInfo(
+                U020LocalCaseInfo(
                     country = "NO",
                     caseNumber = "124124",
                     institutionID = "NO:NAVAT05",
                     institutionName = "NAV ACC 05"
                 ),
-                LocalCaseInfo(
+                U020LocalCaseInfo(
                     country = "SE",
                     caseNumber = "SE789123",
                     institutionID = "SE:FA001",

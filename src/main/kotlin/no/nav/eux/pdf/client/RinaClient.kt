@@ -6,6 +6,9 @@ import no.nav.eux.pdf.config.RinaCpiServiceProperties
 import no.nav.eux.pdf.model.domain.u020.U020ChildDocument
 import no.nav.eux.pdf.model.domain.u020.U020MasterDocument
 import no.nav.eux.pdf.model.domain.u020.U020SubdocumentsCollection
+import no.nav.eux.pdf.model.domain.u029.U029ChildDocument
+import no.nav.eux.pdf.model.domain.u029.U029MasterDocument
+import no.nav.eux.pdf.model.domain.u029.U029SubdocumentsCollection
 import no.nav.eux.pdf.model.rinasak.RinaCase
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Component
@@ -106,5 +109,68 @@ class RinaClient(
             .toEntity<U020ChildDocument>()
             .body!!
 
-    //TODO we need 3 new methods to get U029_Subdocuments.json, U029_Master.json and U029_Child_*.json
+    fun u029MasterDocument(caseId: Int, documentId: String): U029MasterDocument =
+        restClient
+            .get()
+            .uri("$casesUri/$caseId/Documents/$documentId")
+            .accept(APPLICATION_JSON)
+            .header("Nav-Call-Id", caseId.toString())
+            .retrieve()
+            .onStatus({ it.is4xxClientError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                mdc(rinasakId = caseId)
+                log.warn { "HTTP ${response.statusCode.value()} client error for document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Dokument ikke funnet")
+            }
+            .onStatus({ it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                mdc(rinasakId = caseId)
+                log.error { "HTTP ${response.statusCode.value()} server error for document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Serverfeil ved henting av dokument")
+            }
+            .toEntity<U029MasterDocument>()
+            .body!!
+
+    fun u029SubdocumentsCollection(caseId: Int, documentId: String): U029SubdocumentsCollection = restClient
+        .get()
+        .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments")
+        .accept(APPLICATION_JSON)
+        .header("Nav-Call-Id", caseId.toString())
+        .retrieve()
+        .onStatus({ it.is4xxClientError }) { _, response ->
+            val errorBody = String(response.body.readAllBytes())
+            mdc(rinasakId = caseId)
+            log.warn { "HTTP ${response.statusCode.value()} client error for subdocuments of document $documentId: $errorBody" }
+            throw ResponseStatusException(response.statusCode, "Underdokumenter ikke funnet")
+        }
+        .onStatus({ it.is5xxServerError }) { _, response ->
+            val errorBody = String(response.body.readAllBytes())
+            mdc(rinasakId = caseId)
+            log.error { "HTTP ${response.statusCode.value()} server error for subdocuments of document $documentId: $errorBody" }
+            throw ResponseStatusException(response.statusCode, "Serverfeil ved henting av underdokumenter")
+        }
+        .toEntity<U029SubdocumentsCollection>()
+        .body!!
+
+    fun u029ChildDocument(caseId: Int, documentId: String, subdocumentId: String): U029ChildDocument =
+        restClient
+            .get()
+            .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments/$subdocumentId")
+            .accept(APPLICATION_JSON)
+            .header("Nav-Call-Id", caseId.toString())
+            .retrieve()
+            .onStatus({ it.is4xxClientError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                mdc(rinasakId = caseId)
+                log.warn { "HTTP ${response.statusCode.value()} client error for subdocument $subdocumentId of document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Underdokument ikke funnet")
+            }
+            .onStatus({ it.is5xxServerError }) { _, response ->
+                val errorBody = String(response.body.readAllBytes())
+                mdc(rinasakId = caseId)
+                log.error { "HTTP ${response.statusCode.value()} server error for subdocument $subdocumentId of document $documentId: $errorBody" }
+                throw ResponseStatusException(response.statusCode, "Serverfeil ved henting av underdokument")
+            }
+            .toEntity<U029ChildDocument>()
+            .body!!
 }

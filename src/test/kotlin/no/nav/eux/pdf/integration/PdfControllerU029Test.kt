@@ -16,8 +16,10 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Import(TestConfig::class)
-@DisplayName("U020 PDF Generation Integration Tests")
-class PdfControllerTest : AbstractPdfApiImplTest() {
+@DisplayName("U029 PDF Generation Integration Tests")
+class PdfControllerU029Test : AbstractPdfApiImplTest() {
+
+    //TODO remake me to target U029 instead of U020!
 
     @BeforeEach
     fun setUp() {

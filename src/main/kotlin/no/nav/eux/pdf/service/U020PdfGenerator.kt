@@ -25,10 +25,10 @@ data class U020Master(
     val iban: String,
     val bicSwift: String? = null,
     val bankReference: String,
-    val localCaseNumbers: List<LocalCaseInfo>? = null
+    val localCaseNumbers: List<U020LocalCaseInfo>? = null
 )
 
-data class LocalCaseInfo(
+data class U020LocalCaseInfo(
     val country: String,
     val caseNumber: String,
     val institutionID: String?,
