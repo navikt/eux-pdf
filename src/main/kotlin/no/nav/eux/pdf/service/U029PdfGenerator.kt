@@ -1,17 +1,8 @@
 package no.nav.eux.pdf.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDFont
-import org.apache.pdfbox.pdmodel.font.PDType0Font
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.time.LocalDate
-import java.time.LocalDateTime.now
-import java.time.format.DateTimeFormatter.ofPattern
 
 data class U029Master(
     val rinasakId: String,
@@ -58,23 +49,13 @@ data class U029Child(
 
 class EessiU029PdfGen {
 
-    val pageWidth = PDRectangle.A4.width
-    val pageHeight = PDRectangle.A4.height
-    val marginLeft = 50f
-    val marginRight = 50f
-    val marginTop = 40f
-    val marginBottom = 50f
-    val lineHeight = 18f
-
-    private val log = logger {}
-
     fun generateU029Document(master: U029Master, claims: List<U029Child>): ByteArray =
         try {
             val document = PDDocument()
-            val writer = PdfWriter(document)
+            val writer = U029PdfWriter(document)
 
             writer.writeRinasakIdTopRight(master.rinasakId)
-            writer.writeDocumentTitle()
+            writer.writeDocumentTitle("U029 - Endret anmodning om refusjon etter bestridelse")
             writer.writeGeneratedDate()
             writer.addBlankLine()
 
@@ -93,157 +74,7 @@ class EessiU029PdfGen {
             throw RuntimeException("Failed to generate EESSI U029 PDF", e)
         }
 
-    private inner class PdfWriter(val document: PDDocument) {
-        var currentPage: PDPage = createNewPage()
-        var contentStream: PDPageContentStream = PDPageContentStream(document, currentPage)
-        var currentY: Float = pageHeight - marginTop
-        var pageNumber: Int = 1
-        val boldFont by lazy { loadFont("NotoSans-Bold.ttf") }
-        val regularFont by lazy { loadFont("NotoSans-Regular.ttf") }
-        val italicFont by lazy { loadFont("NotoSans-Italic.ttf") }
-
-        private fun createNewPage(): PDPage {
-            val page = PDPage(PDRectangle.A4)
-            document.addPage(page)
-            return page
-        }
-
-        private fun writeFooter() {
-            val footerY = marginBottom - 15f
-            val footerLineY = marginBottom - 5f
-
-            contentStream.beginText()
-            contentStream.setFont(regularFont, 9f)
-            contentStream.newLineAtOffset(marginLeft, footerY)
-            contentStream.showText("U029")
-            contentStream.endText()
-
-            val pageText = "Side $pageNumber"
-            val pageTextWidth = regularFont.getStringWidth(pageText) / 1000 * 9f
-            contentStream.beginText()
-            contentStream.setFont(regularFont, 9f)
-            contentStream.newLineAtOffset(pageWidth - marginRight - pageTextWidth, footerY)
-            contentStream.showText(pageText)
-            contentStream.endText()
-
-            contentStream.setLineWidth(0.5f)
-            contentStream.moveTo(marginLeft, footerLineY)
-            contentStream.lineTo(pageWidth - marginRight, footerLineY)
-            contentStream.stroke()
-        }
-
-        private fun checkPageSpace(requiredSpace: Float = lineHeight) {
-            if (currentY - requiredSpace < marginBottom + 30f) {
-                writeFooter()
-                contentStream.close()
-                currentPage = createNewPage()
-                contentStream = PDPageContentStream(document, currentPage)
-                currentY = pageHeight - marginTop
-                pageNumber++
-            }
-        }
-
-        fun writeDocumentTitle() {
-            checkPageSpace(40f)
-
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 18f)
-            contentStream.newLineAtOffset(marginLeft, currentY)
-            contentStream.showText("U029 - Endret anmodning om refusjon etter bestridelse")
-            contentStream.endText()
-
-            currentY -= 15f
-
-            contentStream.setLineWidth(1f)
-            contentStream.setStrokingColor(0.7f, 0.7f, 0.7f)
-            contentStream.moveTo(marginLeft, currentY)
-            contentStream.lineTo(pageWidth - marginRight, currentY)
-            contentStream.stroke()
-
-            currentY -= 10f
-        }
-
-        fun writeGeneratedDate() {
-            checkPageSpace()
-            val dateString = "Generert: ${now().format(ofPattern("dd.MM.yyyy 'kl.' HH:mm"))}"
-            contentStream.beginText()
-            contentStream.setFont(italicFont, 8f)
-            contentStream.setNonStrokingColor(0.5f, 0.5f, 0.5f)
-            contentStream.newLineAtOffset(marginLeft, currentY)
-            contentStream.showText(dateString)
-            contentStream.endText()
-            contentStream.setNonStrokingColor(0f, 0f, 0f)
-            currentY -= lineHeight
-        }
-
-        fun writeSectionHeader(title: String) {
-            checkPageSpace(30f)
-            addBlankLine()
-
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 12f)
-            contentStream.newLineAtOffset(marginLeft, currentY)
-            contentStream.showText(title)
-            contentStream.endText()
-            currentY -= 25f
-        }
-
-        fun writeSubsectionHeader(title: String) {
-            checkPageSpace(20f)
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 10f)
-            contentStream.setNonStrokingColor(0.2f, 0.2f, 0.2f)
-            contentStream.newLineAtOffset(marginLeft + 10f, currentY)
-            contentStream.showText(title)
-            contentStream.endText()
-            contentStream.setNonStrokingColor(0f, 0f, 0f)
-            currentY -= 18f
-        }
-
-        fun writeKeyValuePair(key: String, value: String, indent: Float = 20f) {
-            checkPageSpace()
-            val keyText = "$key:"
-            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 12f
-
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 12f)
-            contentStream.newLineAtOffset(marginLeft + indent, currentY)
-            contentStream.showText(keyText)
-            contentStream.endText()
-
-            contentStream.beginText()
-            contentStream.setFont(regularFont, 12f)
-            contentStream.newLineAtOffset(marginLeft + indent + keyWidth + 5f, currentY)
-            contentStream.showText(value)
-            contentStream.endText()
-
-            currentY -= lineHeight
-        }
-
-        fun writeCompactKeyValuePair(key: String, value: String, startX: Float) {
-            val keyText = "$key:"
-            val keyWidth = boldFont.getStringWidth(keyText) / 1000 * 12f
-
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 12f)
-            contentStream.newLineAtOffset(startX, currentY)
-            contentStream.showText(keyText)
-            contentStream.endText()
-
-            contentStream.beginText()
-            contentStream.setFont(regularFont, 12f)
-            contentStream.newLineAtOffset(startX + keyWidth + 3f, currentY)
-            contentStream.showText(value)
-            contentStream.endText()
-        }
-
-        fun addBlankLine() {
-            currentY -= lineHeight * 0.8f
-        }
-
-        fun addSmallSpace() {
-            currentY -= lineHeight * 0.3f
-        }
+    private class U029PdfWriter(document: PDDocument) : BasePdfWriter(document, "U029") {
 
         fun writeMasterInformation(master: U029Master) {
             writeSectionHeader("Dokumentinformasjon")
@@ -277,17 +108,7 @@ class EessiU029PdfGen {
                 writeSingleClaim(claim, index, claims.size)
             }
 
-            writeFooter()
-            contentStream.close()
-        }
-
-        private fun startNewPageForClaims() {
-            writeFooter()
-            contentStream.close()
-            currentPage = createNewPage()
-            contentStream = PDPageContentStream(document, currentPage)
-            currentY = pageHeight - marginTop
-            pageNumber++
+            close()
         }
 
         private fun writeSingleClaim(claim: U029Child, index: Int, totalClaims: Int) {
@@ -306,18 +127,7 @@ class EessiU029PdfGen {
 
         private fun calculateRequiredSpace(): Float {
             val baseLines = 10
-            return 120f + (baseLines * lineHeight)
-        }
-
-        private fun ensureSufficientSpace(requiredSpace: Float) {
-            if (currentY - requiredSpace < marginBottom + 30f) {
-                writeFooter()
-                contentStream.close()
-                currentPage = createNewPage()
-                contentStream = PDPageContentStream(document, currentPage)
-                currentY = pageHeight - marginTop
-                pageNumber++
-            }
+            return 120f + (baseLines * 18f)
         }
 
         private fun writeClaimDetails(claim: U029Child) {
@@ -327,7 +137,7 @@ class EessiU029PdfGen {
         }
 
         private fun writePersonalInformation(claim: U029Child) {
-            val columnX = marginLeft + 30f
+            val columnX = getMarginLeft() + 30f
 
             writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
             currentY -= 16f
@@ -338,13 +148,15 @@ class EessiU029PdfGen {
         }
 
         private fun writeClaimInformation(claim: U029Child) {
-            val columnX = marginLeft + 30f
+            val columnX = getMarginLeft() + 30f
 
             writeCompactKeyValuePair("ID-nummer for krav om refusjon", claim.reimbursementRequestID, columnX)
             currentY -= 16f
             writeCompactKeyValuePair("ID bestridelse av refusjon", claim.reimbursementContestationID, columnX)
             currentY -= 16f
-            writeCompactKeyValuePair("ID for endret anmodning om refusjon", claim.amendedReimbursementRequestID, columnX)
+            writeCompactKeyValuePair(
+                "ID for endret anmodning om refusjon", claim.amendedReimbursementRequestID, columnX
+            )
             currentY -= 16f
             writeCompactKeyValuePair("Løpenummer for enkeltkrav", claim.sequentialNumber, columnX)
             currentY -= 16f
@@ -362,7 +174,7 @@ class EessiU029PdfGen {
         }
 
         private fun writeInstitutionalInformation(claim: U029Child) {
-            val columnX = marginLeft + 30f
+            val columnX = getMarginLeft() + 30f
 
             writeCompactKeyValuePair("Institusjon", "${claim.institutionName} (${claim.institutionID})", columnX)
             currentY -= 16f
@@ -371,7 +183,8 @@ class EessiU029PdfGen {
             writeCompactKeyValuePair("Arbeidsperiode", workingPeriod, columnX)
             currentY -= 16f
 
-            val reimbursementPeriod = "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}"
+            val reimbursementPeriod =
+                "${formatDate(claim.reimbursementPeriodStart)} - ${formatDate(claim.reimbursementPeriodEnd)}"
             writeCompactKeyValuePair("Refusjonsperiode", reimbursementPeriod, columnX)
             currentY -= 16f
 
@@ -382,56 +195,12 @@ class EessiU029PdfGen {
             currentY -= 17f
         }
 
-        private fun shouldDrawSeparator(index: Int, totalClaims: Int): Boolean =
-            index < totalClaims - 1
-
-        private fun drawClaimSeparator() {
-            contentStream.setLineWidth(0.5f)
-            contentStream.setStrokingColor(0.9f, 0.9f, 0.9f)
-            contentStream.moveTo(marginLeft + 20f, currentY)
-            contentStream.lineTo(pageWidth - marginRight - 20f, currentY)
-            contentStream.stroke()
-            currentY -= 8f
-        }
-
-        fun writeRinasakIdTopRight(rinasakId: String) {
-            val text = "Saksnr: $rinasakId"
-            val textWidth = boldFont.getStringWidth(text) / 1000 * 8f
-
-            contentStream.beginText()
-            contentStream.setFont(boldFont, 8f)
-            contentStream.newLineAtOffset(pageWidth - marginRight - textWidth, pageHeight - marginTop - 10f)
-            contentStream.showText(text)
-            contentStream.endText()
-        }
-
-        private fun loadFont(fontFileName: String): PDFont {
-            val fontStream = javaClass.getResourceAsStream("/fonts/$fontFileName")
-                ?: throw IllegalStateException("Font file $fontFileName not found in resources/fonts/")
-            return PDType0Font.load(document, fontStream)
-        }
+        private fun getStatusDescription(statusCode: String): String =
+            when (statusCode) {
+                "01" -> "Aktiv"
+                "02" -> "Inaktiv"
+                "03" -> "Avsluttet"
+                else -> "Ukjent ($statusCode)"
+            }
     }
-
-    fun formatDate(dateString: String): String =
-        try {
-            val date = LocalDate.parse(dateString)
-            date.format(ofPattern("dd.MM.yyyy"))
-        } catch (e: Exception) {
-            dateString
-        }
-
-    fun getSexDescription(sexCode: String): String =
-        when (sexCode) {
-            "01" -> "Mann"
-            "02" -> "Kvinne"
-            else -> "Ukjent ($sexCode)"
-        }
-
-    fun getStatusDescription(statusCode: String): String =
-        when (statusCode) {
-            "01" -> "Aktiv"
-            "02" -> "Inaktiv"
-            "03" -> "Avsluttet"
-            else -> "Ukjent ($statusCode)"
-        }
 }
