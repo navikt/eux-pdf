@@ -1,6 +1,5 @@
 package no.nav.eux.pdf.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -41,7 +40,6 @@ open class BasePdfWriter(
     var currentY: Float = pageHeight - marginTop
     var pageNumber: Int = 1
 
-    private val log = logger {}
     val boldFont by lazy { loadFont("NotoSans-Bold.ttf") }
     val regularFont by lazy { loadFont("NotoSans-Regular.ttf") }
     val italicFont by lazy { loadFont("NotoSans-Italic.ttf") }
