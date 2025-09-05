@@ -105,6 +105,7 @@ class EessiU029PdfGen {
             writeSectionHeader("Individuelle krav")
 
             claims.forEachIndexed { index, claim ->
+                println("Rendering claim index: $index, sequentialNumber: ${claim.sequentialNumber}")
                 writeSingleClaim(claim, index, claims.size)
             }
 
