@@ -1,0 +1,36 @@
+{
+  "U029_Master": {
+    "sedGVer": "4",
+    "sedPackage": "Sector Components/Unemployment/U029_Master",
+    "sedVer": "3",
+    "LocalCaseNumbers": {
+      "LocalCaseNumber": [
+        {
+          "country": {
+            "value": [
+              "NO"
+            ]
+          },
+          "caseNumber": "1002",
+          "Institution": {
+            "institutionID": "NO:NAVAT05",
+            "institutionName": "NAV ACC 05"
+          }
+        }
+      ]
+    },
+    "GeneralInformation": {
+      "reimbursementRequestID": "1234567890",
+      "reimbursementContestationID": "bb3af3d91ece4d8a815d021e3e569b56",
+      "amendedReimbursementRequestID": "5f260979ccc1446ea26b8a8269118e3f",
+      "UpdatedTotalAmountRequested": {
+        "amount": "1000.00",
+        "currency": {
+          "value": [
+            "EUR"
+          ]
+        }
+      }
+    }
+  }
+}

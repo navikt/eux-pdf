@@ -1,8 +1,8 @@
 package no.nav.eux.pdf.service
 
 import no.nav.eux.pdf.client.RinaClient
-import no.nav.eux.pdf.model.domain.U020ChildDocument
-import no.nav.eux.pdf.model.domain.U020MasterContent
+import no.nav.eux.pdf.model.domain.u020.U020ChildDocument
+import no.nav.eux.pdf.model.domain.u020.U020MasterContent
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -16,13 +16,13 @@ class U020PdfService(
         caseId: Int,
         documentId: String
     ): ByteArray {
-        val masterDocument = rinaClient.getDocument(caseId, documentId)
+        val masterDocument = rinaClient.u020MasterDocument(caseId, documentId)
         val masterDocumentContent = masterDocument.u020Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U020 master ikke funnet")
-        val subdocumentsCollection = rinaClient.getSubdocuments(caseId, documentId)
+        val subdocumentsCollection = rinaClient.u020SubdocumentsCollection(caseId, documentId)
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
-                rinaClient.getSubdocument(caseId, documentId, subdocument.id)
+                rinaClient.u020ChildDocument(caseId, documentId, subdocument.id)
             }
         }
         val master = mapToU020Master(caseId.toString(), masterDocumentContent)
@@ -37,7 +37,7 @@ class U020PdfService(
         val bankInfo = generalInfo.bankInformation
 
         val localCaseNumbers = master.localCaseNumbers?.localCaseNumber?.map { localCase ->
-            LocalCaseInfo(
+            U020LocalCaseInfo(
                 country = localCase.country.value.firstOrNull() ?: "",
                 caseNumber = localCase.caseNumber,
                 institutionID = localCase.institution?.institutionID,

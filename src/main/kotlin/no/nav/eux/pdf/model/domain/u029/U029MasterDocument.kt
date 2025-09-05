@@ -1,13 +1,15 @@
-package no.nav.eux.pdf.model.domain
+package no.nav.eux.pdf.model.domain.u029
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.eux.pdf.model.domain.Country
+import no.nav.eux.pdf.model.domain.Institution
 
-data class U020MasterDocument(
-    @JsonProperty("U020_Master")
-    val u020Master: U020MasterContent?
+data class U029MasterDocument(
+    @JsonProperty("U029_Master")
+    val u029Master: U029MasterContent?
 )
 
-data class U020MasterContent(
+data class U029MasterContent(
     val sedGVer: String,
     val sedPackage: String,
     val sedVer: String,
@@ -31,31 +33,17 @@ data class LocalCaseNumber(
 
 data class GeneralInformation(
     val reimbursementRequestID: String,
-    val numberIndividualClaims: String,
-    @JsonProperty("TotalAmountRequested")
-    val totalAmountRequested: TotalAmountRequested,
-    @JsonProperty("BankInformation")
-    val bankInformation: BankInformation
+    val reimbursementContestationID: String,
+    val amendedReimbursementRequestID: String,
+    @JsonProperty("UpdatedTotalAmountRequested")
+    val updatedTotalAmountRequested: UpdatedTotalAmountRequested
 )
 
-data class TotalAmountRequested(
+data class UpdatedTotalAmountRequested(
     val amount: String,
     val currency: Currency
 )
 
 data class Currency(
     val value: List<String>
-)
-
-data class BankInformation(
-    @JsonProperty("SEPABankDetails")
-    val sepaBankDetails: SepaBankDetails,
-    val bankTransferSubjectOrTransactionReference: String
-)
-
-data class SepaBankDetails(
-    @JsonProperty("IBAN")
-    val iban: String,
-    @JsonProperty("BICSWIFT")
-    val bicSwift: String? = null
 )

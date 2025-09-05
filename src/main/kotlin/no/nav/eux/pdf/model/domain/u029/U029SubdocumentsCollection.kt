@@ -1,6 +1,6 @@
-package no.nav.eux.pdf.model.domain
+package no.nav.eux.pdf.model.domain.u029
 
-data class U020SubdocumentsCollection(
+data class U029SubdocumentsCollection(
     val totalCount: Int,
     val items: List<SubdocumentItem>
 )
@@ -45,14 +45,7 @@ data class Organisation(
 data class Version(
     val id: String,
     val date: String,
-    val user: User
-)
-
-data class User(
-    val id: String,
-    val type: String,
-    val name: String,
-    val organisation: Organisation
+    val user: Creator
 )
 
 data class Traits(

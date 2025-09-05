@@ -1,0 +1,118 @@
+{
+  "totalCount": 2,
+  "items": [
+    {
+      "no": "1755514998553",
+      "subdocuments": [
+        {
+          "id": "600f6e5c4e8f49b2ab1c6a5a8bf9b040",
+          "mimeType": "json",
+          "lastUpdate": "2025-08-18T11:34:13.145Z",
+          "creationDate": "2025-08-18T11:34:12.700Z",
+          "creator": {
+            "id": "0",
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:NAVAT07",
+              "registryNumber": "",
+              "name": "NAV ACC 07",
+              "acronym": "NAVAT07",
+              "countryCode": "NO",
+              "activeSince": "2018-08-27T00:00:00.000Z"
+            }
+          },
+          "hasMultipleVersions": false,
+          "versions": [
+            {
+              "id": "1",
+              "date": "2025-08-18T11:34:13.145Z",
+              "user": {
+                "id": "0",
+                "type": "User",
+                "name": "system",
+                "organisation": {
+                  "id": "NO:NAVAT07",
+                  "registryNumber": "",
+                  "name": "NAV ACC 07",
+                  "acronym": "NAVAT07",
+                  "countryCode": "NO",
+                  "activeSince": "2018-08-27T00:00:00.000Z"
+                }
+              }
+            }
+          ],
+          "parentDocumentId": "9ed70cf2501049a3ad625cacc77e1087",
+          "type": "U029",
+          "attachments": [],
+          "traits": {
+            "fam": "etter",
+            "for": "for en",
+            "cid": "1"
+          },
+          "validation": {
+            "status": "valid"
+          }
+        }
+      ],
+      "id": "600f6e5c4e8f49b2ab1c6a5a8bf9b040"
+    },
+    {
+      "no": "1755514999305",
+      "subdocuments": [
+        {
+          "id": "183ef9843a8b4f89985a8fe4120c66de",
+          "mimeType": "json",
+          "lastUpdate": "2025-08-18T11:34:13.474Z",
+          "creationDate": "2025-08-18T11:34:13.125Z",
+          "creator": {
+            "id": "0",
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:NAVAT07",
+              "registryNumber": "",
+              "name": "NAV ACC 07",
+              "acronym": "NAVAT07",
+              "countryCode": "NO",
+              "activeSince": "2018-08-27T00:00:00.000Z"
+            }
+          },
+          "hasMultipleVersions": false,
+          "versions": [
+            {
+              "id": "1",
+              "date": "2025-08-18T11:34:13.474Z",
+              "user": {
+                "id": "0",
+                "type": "User",
+                "name": "system",
+                "organisation": {
+                  "id": "NO:NAVAT07",
+                  "registryNumber": "",
+                  "name": "NAV ACC 07",
+                  "acronym": "NAVAT07",
+                  "countryCode": "NO",
+                  "activeSince": "2018-08-27T00:00:00.000Z"
+                }
+              }
+            }
+          ],
+          "parentDocumentId": "9ed70cf2501049a3ad625cacc77e1087",
+          "type": "U029",
+          "attachments": [],
+          "traits": {
+            "fam": "etter",
+            "for": "for en",
+            "cid": "2"
+          },
+          "validation": {
+            "status": "valid"
+          }
+        }
+      ],
+      "id": "183ef9843a8b4f89985a8fe4120c66de"
+    }
+  ]
+}
+
