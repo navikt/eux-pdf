@@ -1,5 +1,6 @@
 package no.nav.eux.pdf.service
 
+import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import no.nav.eux.pdf.client.RinaClient
 import no.nav.eux.pdf.model.domain.u029.U029ChildDocument
 import no.nav.eux.pdf.model.domain.u029.U029MasterContent
@@ -12,6 +13,8 @@ class U029PdfService(
     val rinaClient: RinaClient
 ) {
 
+    val log = logger {}
+
     fun u029Pdf(
         caseId: Int,
         documentId: String
@@ -20,11 +23,13 @@ class U029PdfService(
         val masterDocumentContent = masterDocument.u029Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U029 master ikke funnet")
         val subdocumentsCollection = rinaClient.u029SubdocumentsCollection(caseId, documentId)
+        log.info { "antall underdokument funnet: ${subdocumentsCollection.items.size}" }
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
                 rinaClient.u029ChildDocument(caseId, documentId, subdocument.id)
             }
         }
+        log.info { "child documents size: ${childDocuments.size}" }
         val master = mapToU029Master(caseId.toString(), masterDocumentContent)
         val claims = childDocuments.map { mapToU029Child(it) }
         val pdfGen = EessiU029PdfGen()
