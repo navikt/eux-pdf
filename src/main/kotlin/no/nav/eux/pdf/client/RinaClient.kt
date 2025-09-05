@@ -115,13 +115,7 @@ class RinaClient(
     private inline fun <reified T : Any> subdocumentsCollection(caseId: Int, documentId: String): T {
         val entity: ResponseEntity<T> = restClient
             .get()
-            .uri { uriBuilder ->
-                uriBuilder.path("$casesUri/$caseId/Documents/$documentId/Subdocuments")
-                    .queryParam("currentDocument", 1)
-                    .build()
-            }
-            .accept(APPLICATION_JSON)
-            .header("Nav-Call-Id", caseId.toString())
+            .uri("$casesUri/$caseId/Documents/$documentId/Subdocuments?currentDocument=1")
             .retrieve()
             .onStatus({ it.is4xxClientError }) { _, response ->
                 val errorBody = String(response.body.readAllBytes())
