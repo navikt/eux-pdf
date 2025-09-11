@@ -205,8 +205,11 @@ class EessiU029PdfGen {
         private fun getStatusDescription(statusCode: String): String =
             when (statusCode) {
                 "01" -> "Akseptert"
-                "02" -> "Status 2"
-                "03" -> "Status 3"
+                "02" -> "Meldt betalt i U024"
+                "03" -> "Beløp tilpasset nasjonalt tak"
+                "04" -> "Endret enkeltkrav"
+                "05" -> "Enkeltkrav tatt ut av anmodning om refusjon"
+                "06" -> "Omtvistet"
                 else -> "Ukjent ($statusCode)"
             }
     }
