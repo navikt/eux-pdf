@@ -3,6 +3,7 @@ package no.nav.eux.pdf.service
 import org.apache.pdfbox.pdmodel.PDDocument
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.time.LocalDateTime
 
 data class U029Master(
     val rinasakId: String,
@@ -49,7 +50,7 @@ data class U029Child(
 
 class EessiU029PdfGen {
 
-    fun generateU029Document(master: U029Master, claims: List<U029Child>): ByteArray =
+    fun generateU029Document(master: U029Master, claims: List<U029Child>, creationDate: LocalDateTime): ByteArray =
         try {
             val document = PDDocument()
             val writer = U029PdfWriter(document)
@@ -59,7 +60,7 @@ class EessiU029PdfGen {
             writer.writeGeneratedDate()
             writer.addBlankLine()
 
-            writer.writeMasterInformation(master)
+            writer.writeMasterInformation(master, creationDate)
             writer.addBlankLine()
             writer.addBlankLine()
 
@@ -76,9 +77,11 @@ class EessiU029PdfGen {
 
     private class U029PdfWriter(document: PDDocument) : BasePdfWriter(document, "U029") {
 
-        fun writeMasterInformation(master: U029Master) {
+        fun writeMasterInformation(master: U029Master, creationDate: LocalDateTime) {
             writeSectionHeader("Dokumentinformasjon")
 
+            writeKeyValuePair("Opprettet dato",
+                "${creationDate.year}-${creationDate.monthValue}-${creationDate.dayOfMonth}")
             writeKeyValuePair("SED-versjon", "${master.sedGVer}.${master.sedVer}")
             writeKeyValuePair("ID-nummer for krav om refusjon", master.reimbursementRequestID)
             writeKeyValuePair("ID bestridelse av refusjon", master.reimbursementContestationID)

@@ -21,6 +21,7 @@ class U029PdfService(
     ): ByteArray {
         val rinasakString = rinaClient.rinasakString(caseId)
         log.info { "rinasak: $rinasakString" }
+
         val masterDocument = rinaClient.u029MasterDocument(caseId, documentId)
         val masterDocumentContent = masterDocument.u029Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U029 master ikke funnet")
@@ -32,10 +33,17 @@ class U029PdfService(
             }
         }
 
+        val creationDate = rinaClient
+            .rinasak(caseId)
+            .documents
+            ?.find { it.id == documentId }
+            ?.creationDate
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Dokument ikke funnet i rinasak")
+
         val master = mapToU029Master(caseId.toString(), masterDocumentContent)
         val claims = childDocuments.map { mapToU029Child(it) }
         val pdfGen = EessiU029PdfGen()
-        return pdfGen.generateU029Document(master, claims)
+        return pdfGen.generateU029Document(master, claims, creationDate)
     }
 
     fun mapToU029Master(rinasakId: String, master: U029MasterContent): U029Master {

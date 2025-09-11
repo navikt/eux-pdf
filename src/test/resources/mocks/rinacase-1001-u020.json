@@ -25,6 +25,7 @@
   "processDefinitionName": "ReimbursementRequest",
   "documents": [
     {
+      "id": "f0293bae3c494391851a76d0f6f82f46",
       "status": "ACTIVE",
       "type": "U020"
     },
