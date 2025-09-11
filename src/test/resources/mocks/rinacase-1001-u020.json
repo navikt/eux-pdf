@@ -26,12 +26,15 @@
   "documents": [
     {
       "id": "f0293bae3c494391851a76d0f6f82f46",
+      "creationDate": "2025-08-18T10:58:36.488Z",
       "status": "ACTIVE",
       "type": "U020"
     },
     {
+      "id": "f0293bae3c494391851a76d0f6f82000",
+      "creationDate": "2025-08-18T10:58:36.488Z",
       "status": "DRAFT",
-      "type": "U020"
+      "type": "U029"
     }
   ],
   "participants": [

@@ -1,13 +1,15 @@
 package no.nav.eux.pdf.integration
 
 import no.nav.eux.pdf.integration.config.TestConfig
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@Disabled
 @Import(TestConfig::class)
 @DisplayName("U020 PDF Generation Integration Tests")
 class PdfControllerU020Test : AbstractPdfApiImplTest() {

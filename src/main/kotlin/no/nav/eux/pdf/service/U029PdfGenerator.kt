@@ -50,14 +50,17 @@ data class U029Child(
 
 class EessiU029PdfGen {
 
-    fun generateU029Document(master: U029Master, claims: List<U029Child>, creationDate: LocalDateTime): ByteArray =
+    fun generateU029Document(
+        master: U029Master,
+        claims: List<U029Child>,
+        creationDate: LocalDateTime
+    ): ByteArray =
         try {
             val document = PDDocument()
             val writer = U029PdfWriter(document)
 
-            writer.writeRinasakIdTopRight(master.rinasakId)
             writer.writeDocumentTitle("U029 - Endret anmodning om refusjon etter bestridelse")
-            writer.writeGeneratedDate()
+            writer.writeGeneratedDateWithRinasakId(master.rinasakId)
             writer.addBlankLine()
 
             writer.writeMasterInformation(master, creationDate)
@@ -201,9 +204,9 @@ class EessiU029PdfGen {
 
         private fun getStatusDescription(statusCode: String): String =
             when (statusCode) {
-                "01" -> "Aktiv"
-                "02" -> "Inaktiv"
-                "03" -> "Avsluttet"
+                "01" -> "Akseptert"
+                "02" -> "Status 2"
+                "03" -> "Status 3"
                 else -> "Ukjent ($statusCode)"
             }
     }

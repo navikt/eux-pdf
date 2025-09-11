@@ -105,15 +105,26 @@ open class BasePdfWriter(
         currentY -= 10f
     }
 
-    fun writeGeneratedDate() {
+    fun writeGeneratedDateWithRinasakId(rinasakId: String) {
         checkPageSpace()
         val dateString = "Generert: ${now().format(ofPattern("dd.MM.yyyy 'kl.' HH:mm"))}"
+        val rinasakText = "Saksnr: $rinasakId"
+        val rinasakTextWidth = boldFont.getStringWidth(rinasakText) / 1000 * 8f
+
         contentStream.beginText()
         contentStream.setFont(italicFont, 8f)
         contentStream.setNonStrokingColor(0.5f, 0.5f, 0.5f)
         contentStream.newLineAtOffset(marginLeft, currentY)
         contentStream.showText(dateString)
         contentStream.endText()
+
+        contentStream.beginText()
+        contentStream.setFont(boldFont, 8f)
+        contentStream.setNonStrokingColor(0f, 0f, 0f)
+        contentStream.newLineAtOffset(pageWidth - marginRight - rinasakTextWidth, currentY)
+        contentStream.showText(rinasakText)
+        contentStream.endText()
+
         contentStream.setNonStrokingColor(0f, 0f, 0f)
         currentY -= lineHeight
     }

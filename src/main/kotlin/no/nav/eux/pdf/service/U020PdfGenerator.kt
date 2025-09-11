@@ -3,6 +3,7 @@ package no.nav.eux.pdf.service
 import org.apache.pdfbox.pdmodel.PDDocument
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.time.LocalDateTime
 
 data class U020Master(
     val rinasakId: String,
@@ -51,17 +52,20 @@ data class U020Child(
 
 class EessiU020PdfGen {
 
-    fun generateU020Document(master: U020Master, claims: List<U020Child>): ByteArray =
+    fun generateU020Document(
+        master: U020Master,
+        claims: List<U020Child>,
+        creationDate: LocalDateTime
+    ): ByteArray =
         try {
             val document = PDDocument()
             val writer = U020PdfWriter(document)
 
-            writer.writeRinasakIdTopRight(master.rinasakId)
             writer.writeDocumentTitle("U020 - Forespørsel om refusjon")
-            writer.writeGeneratedDate()
+            writer.writeGeneratedDateWithRinasakId(master.rinasakId)
             writer.addBlankLine()
 
-            writer.writeMasterInformation(master)
+            writer.writeMasterInformation(master, creationDate)
             writer.addBlankLine()
             writer.addBlankLine()
 
@@ -78,9 +82,11 @@ class EessiU020PdfGen {
 
     private class U020PdfWriter(document: PDDocument) : BasePdfWriter(document, "U020") {
 
-        fun writeMasterInformation(master: U020Master) {
+        fun writeMasterInformation(master: U020Master, creationDate: LocalDateTime) {
             writeSectionHeader("Dokumentinformasjon")
 
+            writeKeyValuePair("Opprettet dato",
+                "${creationDate.year}-${creationDate.monthValue}-${creationDate.dayOfMonth}")
             writeKeyValuePair("SED-versjon", "${master.sedGVer}.${master.sedVer}")
             writeKeyValuePair("Forespørsel-ID", master.reimbursementRequestID)
             writeKeyValuePair("Antall krav", master.numberIndividualClaims)

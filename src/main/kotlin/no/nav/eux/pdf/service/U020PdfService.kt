@@ -21,24 +21,23 @@ class U020PdfService(
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U020 master ikke funnet")
         val subdocumentsCollection = rinaClient.u020SubdocumentsCollection(caseId, documentId)
 
-        println("=== U020 Subdocuments Collection Debug ===")
-        println("subdocumentsCollection.items.size: ${subdocumentsCollection.items.size}")
-        subdocumentsCollection.items.forEachIndexed { index, item ->
-            println("Item $index: subdocuments.size = ${item.subdocuments.size}")
-        }
-
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
                 rinaClient.u020ChildDocument(caseId, documentId, subdocument.id)
             }
         }
-        println("Total childDocuments.size: ${childDocuments.size}")
-        println("=== End Debug ===")
+
+        val creationDate = rinaClient
+            .rinasak(caseId)
+            .documents
+            ?.find { it.id == documentId }
+            ?.creationDate
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Dokument ikke funnet i rinasak")
 
         val master = mapToU020Master(caseId.toString(), masterDocumentContent)
         val claims = childDocuments.map { mapToU020Child(it) }
         val pdfGen = EessiU020PdfGen()
-        return pdfGen.generateU020Document(master, claims)
+        return pdfGen.generateU020Document(master, claims, creationDate)
     }
 
      fun mapToU020Master(rinasakId: String, master: U020MasterContent): U020Master {

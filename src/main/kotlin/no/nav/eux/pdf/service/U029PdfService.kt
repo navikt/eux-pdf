@@ -19,9 +19,6 @@ class U029PdfService(
         caseId: Int,
         documentId: String
     ): ByteArray {
-        val rinasakString = rinaClient.rinasakString(caseId)
-        log.info { "rinasak: $rinasakString" }
-
         val masterDocument = rinaClient.u029MasterDocument(caseId, documentId)
         val masterDocumentContent = masterDocument.u029Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U029 master ikke funnet")

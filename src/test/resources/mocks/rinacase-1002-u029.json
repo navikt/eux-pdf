@@ -25,10 +25,14 @@
   "processDefinitionName": "ReimbursementContestation",
   "documents": [
     {
+      "id": "9ed70cf2501049a3ad625cacc77e1087",
+      "creationDate": "2025-08-18T10:58:36.488Z",
       "status": "ACTIVE",
       "type": "U029"
     },
     {
+      "id": "f0293bae3c494391851a76d0f6f82000",
+      "creationDate": "2025-08-18T10:58:36.488Z",
       "status": "DRAFT",
       "type": "U029"
     }

@@ -3,6 +3,7 @@ package no.nav.eux.pdf
 import no.nav.eux.pdf.service.*
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.time.LocalDateTime
 
 class U020PdfGeneratorTest {
 
@@ -208,7 +209,7 @@ class U020PdfGeneratorTest {
                 requestedCurrency = "EUR"
             )
         )
-        val pdfBytes = pdfGen.generateU020Document(master, claims)
+        val pdfBytes = pdfGen.generateU020Document(master, claims, LocalDateTime.now())
         val targetDir = File("target")
         if (!targetDir.exists())
             targetDir.mkdirs()
