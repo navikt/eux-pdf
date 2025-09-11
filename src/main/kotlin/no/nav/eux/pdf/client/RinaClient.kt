@@ -26,6 +26,24 @@ class RinaClient(
 
     val casesUri: String by lazy { "${rinaCpiServiceProperties.rinaBaseUrl}/eessiRest/Cases" }
 
+    fun rinasakString(rinasakId: Int): String = restClient
+        .get()
+        .uri("$casesUri/$rinasakId")
+        .accept(APPLICATION_JSON)
+        .header("Nav-Call-Id", rinasakId.toString())
+        .retrieve()
+        .onStatus({ it.is4xxClientError || it.is5xxServerError }) { _, response ->
+            val errorBody = String(response.body.readAllBytes())
+            log.error { "HTTP ${response.statusCode.value()} error for rinasak $rinasakId: $errorBody" }
+            val errorMessage = if (response.statusCode.is4xxClientError)
+                "Rinasak ikke funnet"
+            else
+                "Serverfeil ved henting av rinasak"
+            throw ResponseStatusException(response.statusCode, errorMessage)
+        }
+        .toEntity<String>()
+        .body!!
+
     fun rinasak(rinasakId: Int): RinaCase = restClient
         .get()
         .uri("$casesUri/$rinasakId")

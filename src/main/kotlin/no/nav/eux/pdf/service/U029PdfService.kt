@@ -19,24 +19,18 @@ class U029PdfService(
         caseId: Int,
         documentId: String
     ): ByteArray {
+        val rinasakString = rinaClient.rinasakString(caseId)
+        log.info { "rinasak: $rinasakString" }
         val masterDocument = rinaClient.u029MasterDocument(caseId, documentId)
         val masterDocumentContent = masterDocument.u029Master
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "U029 master ikke funnet")
         val subdocumentsCollection = rinaClient.u029SubdocumentsCollection(caseId, documentId)
-
-        println("=== U029 Subdocuments Collection Debug ===")
-        println("subdocumentsCollection.items.size: ${subdocumentsCollection.items.size}")
-        subdocumentsCollection.items.forEachIndexed { index, item ->
-            println("Item $index: subdocuments.size = ${item.subdocuments.size}")
-        }
 
         val childDocuments = subdocumentsCollection.items.flatMap { item ->
             item.subdocuments.map { subdocument ->
                 rinaClient.u029ChildDocument(caseId, documentId, subdocument.id)
             }
         }
-        println("Total childDocuments.size: ${childDocuments.size}")
-        println("=== End Debug ===")
 
         val master = mapToU029Master(caseId.toString(), masterDocumentContent)
         val claims = childDocuments.map { mapToU029Child(it) }
