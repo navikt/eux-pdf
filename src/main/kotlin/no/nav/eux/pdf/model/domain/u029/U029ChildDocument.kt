@@ -1,6 +1,8 @@
 package no.nav.eux.pdf.model.domain.u029
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.eux.pdf.model.domain.Country
+import no.nav.eux.pdf.model.domain.Institution
 
 data class U029ChildDocument(
     @JsonProperty("U029_Child")
@@ -50,14 +52,22 @@ data class Status(
 
 data class Person(
     @JsonProperty("PersonIdentification")
-    val personIdentification: PersonIdentification
+    val personIdentification: PersonIdentification,
+    @JsonProperty("AdditionalInformationPerson")
+    val additionalInformationPerson: AdditionalInformationPerson? = null
 )
 
 data class PersonIdentification(
     val familyName: String,
     val forename: String,
     val dateBirth: String,
-    val sex: Status
+    val sex: Status,
+    val familyNameAtBirth: String? = null,
+    val forenameAtBirth: String? = null,
+    @JsonProperty("PINPersonInEachInstitution")
+    val pinPersonInEachInstitution: PinPersonInEachInstitution? = null,
+    @JsonProperty("IfPINNotProvidedForEveryInstitutionPleaseProvide")
+    val ifPinNotProvidedForEveryInstitutionPleaseProvide: IfPinNotProvidedForEveryInstitutionPleaseProvide? = null
 )
 
 data class InstitutionWhichCertifiedInsuranceRecord(
@@ -88,4 +98,36 @@ data class ReimbursementPeriod(
 data class RequestedAmountForReimbursement(
     val amount: String,
     val currency: Status
+)
+
+data class PinPersonInEachInstitution(
+    @JsonProperty("PersonalIdentificationNumber")
+    val personalIdentificationNumber: List<PersonalIdentificationNumber>? = null
+)
+
+data class PersonalIdentificationNumber(
+    val country: Country,
+    val personalIdentificationNumber: String,
+    val sector: Sector?,
+    @JsonProperty("Institution")
+    val institution: Institution?
+)
+
+data class Sector(
+    val value: List<String>
+)
+
+data class IfPinNotProvidedForEveryInstitutionPleaseProvide(
+    @JsonProperty("PlaceBirth")
+    val placeBirth: PlaceBirth? = null
+)
+
+data class PlaceBirth(
+    val town: String? = null,
+    val region: String? = null,
+    val country: Country? = null
+)
+
+data class AdditionalInformationPerson(
+    val nationality: Country? = null
 )

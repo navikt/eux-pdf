@@ -30,6 +30,11 @@ data class U029Child(
     val forename: String,
     val dateBirth: String,
     val sex: String,
+    val familyNameAtBirth: String? = null,
+    val forenameAtBirth: String? = null,
+    val personalIdentificationNumbers: List<PersonIdInfo>? = null,
+    val placeBirth: PlaceBirthInfo? = null,
+    val nationality: String? = null,
     val reimbursementRequestID: String,
     val reimbursementContestationID: String,
     val amendedReimbursementRequestID: String,
@@ -112,7 +117,6 @@ class EessiU029PdfGen {
             writeSectionHeader("Individuelle krav")
 
             claims.forEachIndexed { index, claim ->
-                println("Rendering claim index: $index, sequentialNumber: ${claim.sequentialNumber}")
                 writeSingleClaim(claim, index, claims.size)
             }
 
@@ -120,7 +124,7 @@ class EessiU029PdfGen {
         }
 
         private fun writeSingleClaim(claim: U029Child, index: Int, totalClaims: Int) {
-            val requiredSpace = calculateRequiredSpace()
+            val requiredSpace = calculateRequiredSpace(claim)
             ensureSufficientSpace(requiredSpace)
 
             if (index > 0) addBlankLine()
@@ -133,26 +137,72 @@ class EessiU029PdfGen {
             }
         }
 
-        private fun calculateRequiredSpace(): Float {
-            val baseLines = 10
-            return 120f + (baseLines * 18f)
+        private fun calculateRequiredSpace(claim: U029Child): Float {
+            val baseLines = 15
+            val additionalLines = claim.personalIdentificationNumbers
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { it.size + 1 }
+                ?: 0
+            return 120f + ((baseLines + additionalLines) * 18f)
         }
 
         private fun writeClaimDetails(claim: U029Child) {
+            writePersonalIdentificationNumbers(claim.personalIdentificationNumbers)
             writePersonalInformation(claim)
             writeClaimInformation(claim)
             writeInstitutionalInformation(claim)
         }
 
+        private fun writePersonalIdentificationNumbers(pins: List<PersonIdInfo>?) {
+            pins?.takeIf { it.isNotEmpty() }?.let { idNumbers ->
+                writeIdNumbersHeader()
+                idNumbers.forEach { pin ->
+                    writeIdNumber(pin)
+                }
+                restoreDefaultTextColor()
+                addSmallSpace()
+            }
+        }
+
         private fun writePersonalInformation(claim: U029Child) {
             val columnX = getMarginLeft() + 30f
 
+            writeBasicPersonalInfo(claim, columnX)
+            writeBirthInfo(claim, columnX)
+            writeOptionalPersonalInfo(claim, columnX)
+        }
+
+        private fun writeBasicPersonalInfo(claim: U029Child, columnX: Float) {
             writeCompactKeyValuePair("Navn", "${claim.forename} ${claim.familyName}", columnX)
             currentY -= 16f
+
+            claim.familyNameAtBirth?.let {
+                writeCompactKeyValuePair("Etternavn ved fødsel", it, columnX)
+                currentY -= 16f
+            }
+            claim.forenameAtBirth?.let {
+                writeCompactKeyValuePair("Fornavn ved fødsel", it, columnX)
+                currentY -= 16f
+            }
+        }
+
+        private fun writeBirthInfo(claim: U029Child, columnX: Float) {
             writeCompactKeyValuePair("Fødselsdato", formatDate(claim.dateBirth), columnX)
             currentY -= 16f
             writeCompactKeyValuePair("Kjønn", getSexDescription(claim.sex), columnX)
             currentY -= 16f
+
+            formatPlaceOfBirth(claim.placeBirth)?.let { placeText ->
+                writeCompactKeyValuePair("Fødselssted", placeText, columnX)
+                currentY -= 16f
+            }
+        }
+
+        private fun writeOptionalPersonalInfo(claim: U029Child, columnX: Float) {
+            claim.nationality?.let {
+                writeCompactKeyValuePair("Nasjonalitet", it, columnX)
+                currentY -= 16f
+            }
         }
 
         private fun writeClaimInformation(claim: U029Child) {
@@ -171,12 +221,12 @@ class EessiU029PdfGen {
             writeCompactKeyValuePair("Status", getStatusDescription(claim.status), columnX)
             currentY -= 16f
 
-            claim.contestedIndividualClaimID?.let {
             if (claim.status == "06" && claim.reasoning != null) {
                 writeCompactKeyValuePair("Omtvistet begrunnelse", claim.reasoning, columnX)
                 currentY -= 16f
             }
 
+            claim.contestedIndividualClaimID?.let {
                 writeCompactKeyValuePair("ID bestridelse av enkeltkrav", it, columnX)
                 currentY -= 16f
             }

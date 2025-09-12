@@ -1,6 +1,5 @@
 package no.nav.eux.pdf.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging.logger
 import no.nav.eux.pdf.client.RinaClient
 import no.nav.eux.pdf.model.domain.u029.U029ChildDocument
 import no.nav.eux.pdf.model.domain.u029.U029MasterContent
@@ -12,8 +11,6 @@ import org.springframework.web.server.ResponseStatusException
 class U029PdfService(
     val rinaClient: RinaClient
 ) {
-
-    val log = logger {}
 
     fun u029Pdf(
         caseId: Int,
@@ -74,6 +71,7 @@ class U029PdfService(
         val child = childDoc.u029Child
         val claim = child.individualClaim
         val person = claim.person.personIdentification
+        val fullPerson = claim.person
         val institution = claim.institutionWhichCertifiedInsuranceRecord.theInstitutionExistsInIr
         val workingPeriods = claim.workingPeriodsConsidered.workingPeriodConsidered
         val reimbursementPeriod = claim.reimbursementPeriod
@@ -85,11 +83,36 @@ class U029PdfService(
         else
             null
 
+        val personalIdNumbers = person.pinPersonInEachInstitution?.personalIdentificationNumber?.map { pin ->
+            PersonIdInfo(
+                country = pin.country.value.firstOrNull() ?: "",
+                personalIdentificationNumber = pin.personalIdentificationNumber,
+                sector = pin.sector?.value?.firstOrNull() ?: "",
+                institutionID = pin.institution?.institutionID ?: "",
+                institutionName = pin.institution?.institutionName ?: ""
+            )
+        }
+
+        val placeBirth = person.ifPinNotProvidedForEveryInstitutionPleaseProvide?.placeBirth?.let { place ->
+            PlaceBirthInfo(
+                town = place.town,
+                region = place.region,
+                country = place.country?.value?.firstOrNull()
+            )
+        }
+
+        val nationality = fullPerson.additionalInformationPerson?.nationality?.value?.firstOrNull()
+
         return U029Child(
             familyName = person.familyName,
             forename = person.forename,
             dateBirth = person.dateBirth,
             sex = person.sex.value.firstOrNull() ?: "",
+            familyNameAtBirth = person.familyNameAtBirth,
+            forenameAtBirth = person.forenameAtBirth,
+            personalIdentificationNumbers = personalIdNumbers,
+            placeBirth = placeBirth,
+            nationality = nationality,
             reimbursementRequestID = claim.reimbursementRequestID,
             reimbursementContestationID = claim.reimbursementContestationID,
             amendedReimbursementRequestID = claim.amendedReimbursementRequestID,
