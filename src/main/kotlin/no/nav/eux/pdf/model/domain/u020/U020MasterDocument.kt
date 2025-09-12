@@ -10,9 +10,9 @@ data class U020MasterDocument(
 )
 
 data class U020MasterContent(
-    val sedGVer: String,
-    val sedPackage: String,
-    val sedVer: String,
+    val sedGVer: String?,
+    val sedPackage: String?,
+    val sedVer: String?,
     @JsonProperty("LocalCaseNumbers")
     val localCaseNumbers: LocalCaseNumbers? = null,
     @JsonProperty("GeneralInformation")

@@ -7,9 +7,9 @@ import java.time.LocalDateTime
 
 data class U029Master(
     val rinasakId: String,
-    val sedGVer: String,
-    val sedPackage: String,
-    val sedVer: String,
+    val sedGVer: String?,
+    val sedPackage: String?,
+    val sedVer: String?,
     val reimbursementRequestID: String,
     val reimbursementContestationID: String,
     val amendedReimbursementRequestID: String,
