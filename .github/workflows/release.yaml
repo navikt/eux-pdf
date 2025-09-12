@@ -104,19 +104,17 @@ jobs:
           VARS: .nais/q2.yaml
           PRINT_PAYLOAD: true
 
-#skru av prod pga refaktorering test i q2
-
-#  deploy-prod:
-#    name: 'Deploy to Production'
-#    runs-on: ubuntu-latest
-#    needs: [build, deploy-q1, deploy-q2]
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: 'Calling nais deploy action for production'
-#        uses: nais/deploy/actions/deploy@v2
-#        env:
-#          CLUSTER: prod-gcp
-#          RESOURCE: .nais/nais.yaml
-#          VAR: image=${{ needs.build.outputs.docker-image }}
-#          VARS: .nais/prod.yaml
-#          PRINT_PAYLOAD: true
+  deploy-prod:
+    name: 'Deploy to Production'
+    runs-on: ubuntu-latest
+    needs: [build, deploy-q1, deploy-q2]
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Calling nais deploy action for production'
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/nais.yaml
+          VAR: image=${{ needs.build.outputs.docker-image }}
+          VARS: .nais/prod.yaml
+          PRINT_PAYLOAD: true
