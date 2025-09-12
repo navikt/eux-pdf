@@ -37,6 +37,7 @@ data class U029Child(
     val contestedIndividualClaimID: String?,
     val amendedContestedIndividualClaimID: String?,
     val status: String,
+    val reasoning: String?,
     val institutionID: String,
     val institutionName: String,
     val workingPeriodStart: String,
@@ -171,6 +172,11 @@ class EessiU029PdfGen {
             currentY -= 16f
 
             claim.contestedIndividualClaimID?.let {
+            if (claim.status == "06" && claim.reasoning != null) {
+                writeCompactKeyValuePair("Omtvistet begrunnelse", claim.reasoning, columnX)
+                currentY -= 16f
+            }
+
                 writeCompactKeyValuePair("ID bestridelse av enkeltkrav", it, columnX)
                 currentY -= 16f
             }

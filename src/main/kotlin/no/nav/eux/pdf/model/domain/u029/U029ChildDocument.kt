@@ -35,7 +35,13 @@ data class IndividualClaim(
 )
 
 data class IndividualClaimStatus(
-    val status: Status
+    val status: Status,
+    @JsonProperty("PleaseFillInFollowingIfStatus6UnderDispute")
+    val pleaseFillInFollowingIfStatus6UnderDispute: PleaseFillInFollowingIfStatus6UnderDispute? = null
+)
+
+data class PleaseFillInFollowingIfStatus6UnderDispute(
+    val reasoning: String
 )
 
 data class Status(

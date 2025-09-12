@@ -79,6 +79,11 @@ class U029PdfService(
         val reimbursementPeriod = claim.reimbursementPeriod
         val requestedAmount = claim.requestedAmountForReimbursement
         val workingPeriod = workingPeriods.firstOrNull()
+        val status = claim.individualClaimStatus.status.value.firstOrNull() ?: ""
+        val reasoning = if (status == "06")
+            claim.individualClaimStatus.pleaseFillInFollowingIfStatus6UnderDispute?.reasoning
+        else
+            null
 
         return U029Child(
             familyName = person.familyName,
@@ -91,7 +96,8 @@ class U029PdfService(
             sequentialNumber = claim.sequentialNumberIndividualClaim,
             contestedIndividualClaimID = claim.contestedIndividualClaimID,
             amendedContestedIndividualClaimID = claim.amendedContestedIndividualClaimID,
-            status = claim.individualClaimStatus.status.value.firstOrNull() ?: "",
+            status = status,
+            reasoning = reasoning,
             institutionID = institution.institutionID,
             institutionName = institution.institutionName,
             workingPeriodStart = workingPeriod?.startDate ?: "",
