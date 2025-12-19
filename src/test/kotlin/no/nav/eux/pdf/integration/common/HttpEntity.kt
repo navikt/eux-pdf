@@ -8,7 +8,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
 fun <T> T.httpEntity(mockOAuth2Server: MockOAuth2Server) =
-    HttpEntity<T>(this, mockOAuth2Server.httpHeaders)
+    HttpEntity(this, mockOAuth2Server.httpHeaders)
 
 fun voidHttpEntity(mockOAuth2Server: MockOAuth2Server) =
     HttpEntity<Void>(mockOAuth2Server.httpHeaders)
