@@ -1,21 +1,20 @@
 package no.nav.eux.pdf.integration
 
 import no.nav.eux.pdf.Application
-import no.nav.eux.pdf.integration.common.voidHttpEntity
+import no.nav.eux.pdf.integration.common.token
 import no.nav.eux.pdf.integration.mock.RequestBodies
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.TestRestTemplate
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.servlet.client.EntityExchangeResult
+import org.springframework.test.web.servlet.client.RestTestClient
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -28,14 +27,14 @@ import kotlin.test.assertTrue
 @ActiveProfiles("test")
 @EnableMockOAuth2Server
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@AutoConfigureTestRestTemplate
+@AutoConfigureRestTestClient
 abstract class AbstractPdfApiImplTest {
 
     @Autowired
     lateinit var mockOAuth2Server: MockOAuth2Server
 
     @Autowired
-    lateinit var restTemplate: TestRestTemplate
+    lateinit var restTestClient: RestTestClient
 
     @Autowired
     lateinit var requestBodies: RequestBodies
@@ -45,33 +44,29 @@ abstract class AbstractPdfApiImplTest {
     }
 
      fun callPdfEndpoint(endpoint: String) =
-        restTemplate.exchange(
-            endpoint,
-            HttpMethod.GET,
-            voidHttpEntity(mockOAuth2Server),
-            ByteArray::class.java
-        )
+        restTestClient.get().uri(endpoint)
+            .header("Authorization", "Bearer ${mockOAuth2Server.token}")
+            .exchange()
+            .expectBody(ByteArray::class.java)
+            .returnResult()
 
      fun callPdfEndpointExpectingError(endpoint: String) =
-        restTemplate.exchange(
-            endpoint,
-            HttpMethod.GET,
-            voidHttpEntity(mockOAuth2Server),
-            String::class.java
-        )
+        restTestClient.get().uri(endpoint)
+            .header("Authorization", "Bearer ${mockOAuth2Server.token}")
+            .exchange()
+            .expectBody(String::class.java)
+            .returnResult()
 
      fun callUnauthenticatedEndpoint(endpoint: String) =
-        restTemplate.exchange(
-            endpoint,
-            HttpMethod.GET,
-            null,
-            String::class.java
-        )
+        restTestClient.get().uri(endpoint)
+            .exchange()
+            .expectBody(String::class.java)
+            .returnResult()
 
-     fun assertSuccessfulPdfResponse(response: ResponseEntity<ByteArray>) {
-        assertEquals(HttpStatus.OK, response.statusCode, "Should return HTTP 200")
-        assertEquals(MediaType.APPLICATION_PDF, response.headers.contentType, "Should return PDF content type")
-        assertNotNull(response.body, "Response body should not be null")
+     fun assertSuccessfulPdfResponse(response: EntityExchangeResult<ByteArray>) {
+        assertEquals(HttpStatus.OK, response.status, "Should return HTTP 200")
+        assertEquals(MediaType.APPLICATION_PDF, response.responseHeaders.contentType, "Should return PDF content type")
+        assertNotNull(response.responseBody, "Response body should not be null")
     }
 
      fun validatePdfFormat(pdfBytes: ByteArray) {
@@ -84,8 +79,8 @@ abstract class AbstractPdfApiImplTest {
         )
     }
 
-     fun validateContentDispositionHeader(response: ResponseEntity<ByteArray>, expectedFilename: String) {
-        val contentDisposition = response.headers.contentDisposition
+     fun validateContentDispositionHeader(response: EntityExchangeResult<ByteArray>, expectedFilename: String) {
+        val contentDisposition = response.responseHeaders.contentDisposition
         assertNotNull(contentDisposition, "Content-Disposition header should be present")
         assertEquals("attachment", contentDisposition.type, "Should be attachment type")
         assertEquals(expectedFilename, contentDisposition.filename, "Should have correct filename")
