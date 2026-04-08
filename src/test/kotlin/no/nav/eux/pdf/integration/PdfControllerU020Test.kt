@@ -31,7 +31,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
             val response = callPdfEndpoint(endpoint)
             assertSuccessfulPdfResponse(response)
 
-            val pdfBytes = response.body!!
+            val pdfBytes = response.responseBody!!
             savePdfForInspection(pdfBytes, "complete-u020", "U020")
 
             verifyAllRinaEndpointsWereCalled()
@@ -48,7 +48,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
             val response = callPdfEndpoint(endpoint)
             assertSuccessfulPdfResponse(response)
 
-            val pdfBytes = response.body!!
+            val pdfBytes = response.responseBody!!
             savePdfForInspection(pdfBytes, "multiple-claims", "U020")
 
             assertTrue(
@@ -71,7 +71,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
             val endpoint = "/api/v1/rinasak/$NON_EXISTENT_CASE_ID/document/u020/$VALID_DOCUMENT_ID_U020"
             logTestInfo("Testing 404 response for non-existent case", endpoint)
             val response = callPdfEndpointExpectingError(endpoint)
-            assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+            assertEquals(HttpStatus.NOT_FOUND, response.status)
             logTestSuccess("Correctly returned 404 for non-existent case")
         }
 
@@ -81,7 +81,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
             val endpoint = "/api/v1/rinasak/$VALID_CASE_ID_U20/document/u020/$NON_EXISTENT_DOCUMENT_ID"
             logTestInfo("Testing 404 response for non-existent document", endpoint)
             val response = callPdfEndpointExpectingError(endpoint)
-            assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+            assertEquals(HttpStatus.NOT_FOUND, response.status)
             logTestSuccess("Correctly returned 404 for non-existent document")
         }
 
@@ -91,7 +91,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
             val endpoint = "/api/v1/rinasak/$VALID_CASE_ID_U20/document/u020/$VALID_DOCUMENT_ID_U020"
             logTestInfo("Testing 401 response for unauthenticated request", endpoint)
             val response = callUnauthenticatedEndpoint(endpoint)
-            assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
+            assertEquals(HttpStatus.UNAUTHORIZED, response.status)
             logTestSuccess("Correctly returned 401 for unauthenticated request")
         }
     }
@@ -120,7 +120,7 @@ class PdfControllerU020Test : AbstractPdfApiImplTest() {
             val response = callPdfEndpoint(endpoint)
             assertSuccessfulPdfResponse(response)
 
-            val pdfBytes = response.body!!
+            val pdfBytes = response.responseBody!!
             validatePdfFormat(pdfBytes)
 
             savePdfForInspection(pdfBytes, "format-validation", "U020")
