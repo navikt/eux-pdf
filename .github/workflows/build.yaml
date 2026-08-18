@@ -44,6 +44,13 @@ jobs:
         run: >
           echo "DOCKER_IMAGE=${IMAGE}:${{ github.sha }}" >> $GITHUB_ENV
 
+      - name: Login to Google Artifact Registry
+        uses: nais/login@v0
+        with:
+          team: eessibasis
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+
       - name: Build docker image
         run: >
           docker build -t ${IMAGE}:${{ github.sha }} .
