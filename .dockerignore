@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+*.iml
+target/*
+!target/eux-pdf.jar
+src/test
+*.md
+docker-compose*.yml
+.env*
+.dockerignore
+Dockerfile
