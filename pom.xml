@@ -7,75 +7,18 @@
     <parent>
         <groupId>no.nav.eux</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>2.0.23</version>
+        <version>3.0.1</version>
     </parent>
 
     <groupId>no.nav.eux.pdf</groupId>
     <artifactId>eux-pdf</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <properties>
-        <httpcore5.version>5.4.3</httpcore5.version>
-        <httpclient5.version>5.6.4</httpclient5.version>
-        <log4j.version>2.25.5</log4j.version>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <scm>
         <connection>scm:git:https://github.com/navikt/eux-pdf.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/eux-pdf.git</developerConnection>
         <url>https://github.com/navikt/eux-pdf.git</url>
     </scm>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Tvinger Tomcat-versjon: spring-boot-dependencies importeres som BOM,
-                 så tomcat.version-propertyen alene overstyrer den ikke. -->
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>${tomcat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-el</artifactId>
-                <version>${tomcat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-websocket</artifactId>
-                <version>${tomcat.version}</version>
-            </dependency>
-            <!-- CVE-2026-49844: log4j. Importeres som BOM slik at log4j-api og
-                 log4j-to-slf4j pinnes konsistent (property alene overstyrer ikke Spring Boot-BOM). -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-bom</artifactId>
-                <version>${log4j.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- CVE-2026-54399 / CVE-2026-54428: httpcore5 + httpcore5-h2 -->
-            <dependency>
-                <groupId>org.apache.httpcomponents.core5</groupId>
-                <artifactId>httpcore5</artifactId>
-                <version>${httpcore5.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents.core5</groupId>
-                <artifactId>httpcore5-h2</artifactId>
-                <version>${httpcore5.version}</version>
-            </dependency>
-            <!-- CVE-2026-64607: httpclient5 -->
-            <dependency>
-                <groupId>org.apache.httpcomponents.client5</groupId>
-                <artifactId>httpclient5</artifactId>
-                <version>${httpclient5.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- PDF -->
@@ -202,7 +145,6 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
                 <executions>
                     <execution>
                         <id>compile</id>
@@ -220,7 +162,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>21</jvmTarget>
                     <compilerPlugins>
                         <plugin>jpa</plugin>
                         <plugin>spring</plugin>
@@ -245,7 +186,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>ban-httpcomponents-cve</id>
